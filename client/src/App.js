@@ -9,6 +9,7 @@ import Rooms from "./components/Rooms"
 import AddRoom from "./components/AddRoom"
 import PlayRoom from "./components/PlayRoom"
 import Chat from "./components/Chat"
+import Okey from "./components/Okey"
 import cookie from 'js-cookie'
 import { io } from "socket.io-client"
 
@@ -252,6 +253,8 @@ function App() {
             <Header title="there" />
 
             <LoginoutForm onLogin={loginFunc} onLogout={logoutFunc} onError={error} user={user} />
+
+            <Okey></Okey>
 
             {user.name && <Chat onSend={(m) => { onMessageSend(user.name + ": " + m, true) }} />}
 
