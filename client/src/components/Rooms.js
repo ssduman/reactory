@@ -1,6 +1,7 @@
 import React from 'react'
 import { FaTimes, FaPlay } from "react-icons/fa"
 import { Link } from 'react-router-dom'
+import { v4 as uuidv4 } from 'uuid'
 
 const Rooms = ({ rooms, onDelete, onPlay }) => {
 
@@ -26,7 +27,7 @@ const Rooms = ({ rooms, onDelete, onPlay }) => {
                             <th> {room.password ? "Yes" : "No"} </th>
                             <th> <FaTimes style={{ color: "red", cursor: "pointer" }} onClick={() => onDelete(room.id)} /></th>
                             <th>
-                                <Link to="/play">
+                                <Link to={"/play?room=" + uuidv4().split("-")[0]}>
                                     <FaPlay style={{ color: "green", cursor: "pointer" }} onClick={() => onPlay(room.id)} />
                                 </Link>
                             </th>

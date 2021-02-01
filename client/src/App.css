@@ -8,6 +8,56 @@
   border: solid;
 }
 
+.okeyTable {
+  width: 600px;
+  height: 400px;
+  position: relative;
+}
+
+.rectangleA {
+  width: 100px;
+  height: 200px;
+  border-color: black;
+  border-width: 10px;
+  stroke: black;
+  border: solid;
+  top: 100px;
+  left: 20px;
+  position: absolute;
+}
+.rectangleB {
+  width: 200px;
+  height: 100px;
+  border-color: black;
+  border-width: 10px;
+  stroke: black;
+  border: solid;
+  top: 20px;
+  left: 150px;
+  position: absolute;
+}
+.rectangleC {
+  width: 100px;
+  height: 200px;
+  border-color: black;
+  border-width: 10px;
+  stroke: black;
+  border: solid;
+  top: 100px;
+  left: 400px;
+  position: absolute;
+}
+
+.myTable {
+  border-collapse: collapse;
+  margin-top: 10px;
+  padding: 2px;
+  width: 60%;
+  top: 350px;
+  left: 100px;
+  position: absolute;
+}
+
 body {
   padding-left: 10px;
 }

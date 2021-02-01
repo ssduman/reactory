@@ -254,8 +254,6 @@ function App() {
 
             <LoginoutForm onLogin={loginFunc} onLogout={logoutFunc} onError={error} user={user} />
 
-            <Okey></Okey>
-
             {user.name && <Chat onSend={(m) => { onMessageSend(user.name + ": " + m, true) }} />}
 
             <Route path="/" exact render={(probs) =>
@@ -267,10 +265,17 @@ function App() {
                 </>
             )} />
 
+            <Route path="/okey" exact render={(probs) =>
+            (
+                <>
+                    <Okey socket={socket} />
+                </>
+            )} />
+
             <Route path="/play" exact render={(probs) =>
             (
                 <>
-                    <PlayRoom />
+                    <PlayRoom user={user.name} socket={socket} />
                     <Footer />
                 </>
             )} />

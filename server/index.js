@@ -89,6 +89,30 @@ io.on('connection', (socket) => {
         console.log('user disconnected')
         socket.removeAllListeners()
     })
+
+    socket.on("tilesReady", (otherClients, room, tiles) => {
+        io.to(otherClients[0]).emit("getTile", tiles[0])
+        io.to(otherClients[1]).emit("getTile", tiles[1])
+        io.to(otherClients[2]).emit("getTile", tiles[2])
+    })
+
+    socket.on("imready", (user, room) => {
+        console.log(user + " joined in " + room)
+        socket.join(room)
+
+        const clients = io.sockets.adapter.rooms.get(room);
+        const numClients = clients ? clients.size : 0
+
+        if (numClients === 4) {
+            let others =  Array.from(clients)
+            console.log("1:", others)
+            others.splice(2, 1)
+            console.log("2:", others)
+            io.to(Array.from(clients)[2]).emit("leader", others, room)
+        }
+    })
+
+
 })
 
 app.get('/api', authenticateToken, (req, res) => {
