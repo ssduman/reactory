@@ -122,10 +122,10 @@ io.on('connection', (socket) => {
         }
     })
 
-    socket.on("tilesReady", (otherClients, room, tiles, lName, tableMap) => {
-        io.to(otherClients[0]).emit("getTile", tiles[0], "a_table", otherClients[0], lName, tableMap["0"])
-        io.to(otherClients[1]).emit("getTile", tiles[1], "b_table", otherClients[1], lName, tableMap["1"])
-        io.to(otherClients[2]).emit("getTile", tiles[2], "d_table", otherClients[2], lName, tableMap["3"])
+    socket.on("tilesReady", (otherClients, room, tiles, lName, tableMap, okey) => {
+        io.to(otherClients[0]).emit("getTile", tiles[0], "a_table", otherClients[0], lName, tableMap["0"], okey)
+        io.to(otherClients[1]).emit("getTile", tiles[1], "b_table", otherClients[1], lName, tableMap["1"], okey)
+        io.to(otherClients[2]).emit("getTile", tiles[2], "d_table", otherClients[2], lName, tableMap["3"], okey)
     })
 
     socket.on("requestTableTile", (client, leader) => {
@@ -140,8 +140,11 @@ io.on('connection', (socket) => {
 
     socket.on("sendToRight", (client, leader, left, right, middle, tile) => {
         console.log("sendToRight", client, leader, left, right, middle, tile)
-        // io.to(right).emit("getTableTile", client, leader, tile)
         socket.broadcast.emit("sendRight", client, leader, left, right, middle, tile)
+    })
+
+    socket.on("nextTurn", (right) => {
+        io.to(right).emit("myTurn")
     })
 
     socket.on('disconnect', () => {

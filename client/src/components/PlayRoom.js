@@ -125,6 +125,10 @@ var myLeaderName;
 var myLeftName;
 var myRightName;
 var myOppositeName;
+var myTurn = false
+var tileAllowed = false
+var myLeftTileStack = []
+var myRightTileStack = []
 const PlayRoom = (props) => {
     var user;
     var room;
@@ -134,24 +138,42 @@ const PlayRoom = (props) => {
 
         var data = e.dataTransfer.getData("id")
         var s = document.getElementById(data)
-        if (s.id === "left") {
-            if (e.target.id === "middle" || e.target.id === "right") {
-                return
+        if (s.id === "left" && myTurn) {
+            if (tileAllowed && myLeftTileStack.length > 0) {
+                if (e.target.id === "middle" || e.target.id === "right") {
+                    return
+                }
+
+                var tempNumber = e.target.innerHTML
+                var tempColor = e.target.style.color
+                e.target.innerHTML = s.innerHTML
+                e.target.style.color = s.style.color
+
+                socket.emit("requestLeftTable", mySocketName, myLeaderName)
+
+                myLeftTileStack.pop()
+                if (myLeftTileStack.length === 0) {
+                    s.innerHTML = "LEFT"
+                    s.style.color = "black"
+                }
+                else {
+                    s.innerHTML = myLeftTileStack[myLeftTileStack.length - 1][0]
+                    s.style.color = myLeftTileStack[myLeftTileStack.length - 1][1]
+                }
+
+                e.target.src = s.src
+
+                tileAllowed = false
             }
-
-            var tempNumber = e.target.innerHTML
-            var tempColor = e.target.style.color
-            e.target.innerHTML = s.innerHTML
-            e.target.style.color = s.style.color
-
-            socket.emit("requestLeftTable", mySocketName, myLeaderName)
-
-            s.innerHTML = "new"
-            s.style.color = "cyan"
-
-            e.target.src = s.src
+            if (myLeftTileStack.length === 0) {
+                s.innerHTML = "LEFT"
+                s.style.color = "black"
+            }
         }
-        else if (s.id === "middle") {
+        else if (s.id === "left" && !myTurn) {
+            return
+        }
+        else if (s.id === "middle" && myTurn) {
             if (e.target.id === "left" || e.target.id === "right") {
                 return
             }
@@ -159,42 +181,48 @@ const PlayRoom = (props) => {
             if (e.target.innerHTML) {
                 return
             }
-            var tempNumber = e.target.innerHTML
-            var tempColor = e.target.style.color
 
-            socket.emit("requestTableTile", mySocketName, myLeaderName)
+            if (tileAllowed) {
+                var tempNumber = e.target.innerHTML
+                var tempColor = e.target.style.color
 
-            socket.on("getTableTile", (client, leader, tile) => {
-                console.log("getTableTile:", client, leader, tile)
-                console.log("e.target:", e.target)
-                socket.off("getTableTile")
+                socket.emit("requestTableTile", mySocketName, myLeaderName)
 
-                let split = tile.split("-")
-                let color = split[0]
-                let number = split[1]
+                socket.on("getTableTile", (client, leader, tile) => {
+                    console.log("getTableTile:", client, leader, tile)
+                    console.log("e.target:", e.target)
+                    socket.off("getTableTile")
 
-                e.target.innerHTML = number.substring(0, number.length - 1)
-                if (color === "fake") {
-                    e.target.style.color = "green"
-                    e.target.innerHTML = "Fake"
-                }
-                else if (color === "red") {
-                    e.target.style.color = "red"
-                }
-                else if (color === "yellow") {
-                    e.target.style.color = "#d6bc13"
-                }
-                else if (color === "blue") {
-                    e.target.style.color = "blue"
-                }
-                else if (color === "black") {
-                    e.target.style.color = "black"
-                }
+                    let split = tile.split("-")
+                    let color = split[0]
+                    let number = split[1]
 
-                e.target.src = s.src
-            })
+                    e.target.innerHTML = number.substring(0, number.length - 1)
+                    if (color === "fake") {
+                        e.target.style.color = "green"
+                        e.target.innerHTML = "Fake"
+                    }
+                    else if (color === "red") {
+                        e.target.style.color = "red"
+                    }
+                    else if (color === "yellow") {
+                        e.target.style.color = "#d6bc13"
+                    }
+                    else if (color === "blue") {
+                        e.target.style.color = "blue"
+                    }
+                    else if (color === "black") {
+                        e.target.style.color = "black"
+                    }
 
+                    e.target.src = s.src
+                })
 
+                tileAllowed = false
+            }
+        }
+        else if (s.id === "middle" && !myTurn) {
+            return
         }
         else if (s.id === "right") {
             return
@@ -203,20 +231,32 @@ const PlayRoom = (props) => {
             if (e.target.id === "left" || e.target.id === "middle") {
                 return
             }
-            else if (e.target.id === "right") {
-                var cell = document.getElementsByClassName("cell1")
-                cell["0"].innerHTML = s.innerHTML
-                cell["0"].style.color = s.style.color
+            else if (e.target.id === "right" && myTurn) {
+                if (!tileAllowed) {
+                    var cell = document.getElementsByClassName("cell1")
+                    cell["0"].innerHTML = s.innerHTML
+                    cell["0"].style.color = s.style.color
 
-                e.target.innerHTML = s.innerHTML
-                e.target.style.color = s.style.color
+                    e.target.innerHTML = s.innerHTML
+                    e.target.style.color = s.style.color
 
-                socket.emit("sendToRight", mySocketName, myLeaderName, myLeftName, myRightName, myOppositeName, s.style.color + "-" + s.innerHTML)
+                    socket.emit("sendToRight", mySocketName, myLeaderName, myLeftName, myRightName, myOppositeName, s.style.color + "-" + s.innerHTML)
 
-                s.innerHTML = ""
-                s.style.color = ""
+                    s.innerHTML = ""
+                    s.style.color = ""
 
-                e.target.src = s.src
+                    e.target.src = s.src
+
+                    myTurn = false
+
+                    socket.emit("nextTurn", myRightName)
+                    return
+                }
+                else {
+                    return
+                }
+            }
+            else if (e.target.id === "right" && !myTurn) {
                 return
             }
             var tempNumber = e.target.innerHTML
@@ -246,8 +286,7 @@ const PlayRoom = (props) => {
             upgrade: false
         })
 
-        socket.on("getTile", (mTile, tName, sName, lName, tableMap) => {
-            console.log("getTile:", mTile, tName)
+        socket.on("getTile", (mTile, tName, sName, lName, tableMap, okey) => {
             myTile = mTile
             myTableName = tName
             mySocketName = sName
@@ -256,12 +295,9 @@ const PlayRoom = (props) => {
             myRightName = tableMap["right"]
             myOppositeName = tableMap["middle"]
 
-            console.log("not leader", myTableName,
-                mySocketName,
-                myLeaderName,
-                myLeftName,
-                myRightName,
-                myOppositeName)
+            var okeyTile = document.getElementsByClassName("okeyTile")
+            okeyTile["0"].innerHTML = okey[0]
+            okeyTile["0"].style.color = okey[1]
 
             myTile.map((tile, index) => {
                 let i = index + 1
@@ -297,13 +333,8 @@ const PlayRoom = (props) => {
             myLeftName = tableMap["2"]["left"]
             myRightName = tableMap["2"]["right"]
             myOppositeName = tableMap["2"]["middle"]
-
-            console.log("leader", myTableName,
-                mySocketName,
-                myLeaderName,
-                myLeftName,
-                myRightName,
-                myOppositeName)
+            myTurn = true
+            tileAllowed = false
 
             var a = _.sample(allTiles, 15)
             var b = _.sample(_.without(allTiles, ...a), 14)
@@ -341,7 +372,15 @@ const PlayRoom = (props) => {
                 }
             })
 
-            socket.emit("tilesReady", otherClients, room, [b_tile, c_tile, d_tile], sName, tableMap)
+            var okeyNumber = Math.floor(Math.random() * 13 + 1)
+            var colors = ["red", "#d6bc13", "blue", "black"]
+            var i = Math.floor(Math.random() * 4)
+            var okey = [okeyNumber, colors[i]]
+            var okeyTile = document.getElementsByClassName("okeyTile")
+            okeyTile["0"].innerHTML = okeyNumber
+            okeyTile["0"].style.color = colors[i]
+
+            socket.emit("tilesReady", otherClients, room, [b_tile, c_tile, d_tile], sName, tableMap, okey)
         })
 
         socket.on("pickTableTile", (client, leader) => {
@@ -374,7 +413,9 @@ const PlayRoom = (props) => {
                 console.log("cell", cell)
                 cell["0"].innerHTML = number
                 cell["0"].style.color = color
-                
+
+                myLeftTileStack.push([number, color])
+
                 var entry = document.getElementById("left")
                 entry.innerHTML = number
                 entry.style.color = color
@@ -385,6 +426,11 @@ const PlayRoom = (props) => {
                 cell["0"].innerHTML = number
                 cell["0"].style.color = color
             }
+        })
+
+        socket.on("myTurn", () => {
+            myTurn = true
+            tileAllowed = true
         })
 
         console.log("user: " + user + ", roomID: " + room)
@@ -398,10 +444,12 @@ const PlayRoom = (props) => {
 
             <div className="okeyTable">
 
-                <div className="cell0" style={{ color: "blue" }}></div>
-                <div className="cell1" style={{ color: "brown" }}></div>
-                <div className="cell2" style={{ color: "green" }}></div>
-                <div className="cell3" style={{ color: "cyan" }}></div>
+                <div className="cell0" style={{ color: "black" }}></div>
+                <div className="cell1" style={{ color: "black" }}></div>
+                <div className="cell2" style={{ color: "black" }}></div>
+                <div className="cell3" style={{ color: "black" }}></div>
+
+                <div className="okeyTile" style={{ color: "red" }}></div>
 
                 <div className="rectangleA"></div>
                 <div className="rectangleB"></div>

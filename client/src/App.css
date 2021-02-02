@@ -108,6 +108,18 @@
   position: absolute;
 }
 
+.okeyTile {
+  width: 20px;
+  height: 40px;
+  border-color: cyan;
+  border-width: 10px;
+  stroke: black;
+  border: solid;
+  top: 200px;
+  left: 240px;
+  position: absolute;
+}
+
 body {
   padding-left: 10px;
 }
