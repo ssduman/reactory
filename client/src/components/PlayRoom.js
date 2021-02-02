@@ -117,6 +117,14 @@ const allTiles = [
 ]
 
 var socket;
+var myTile;
+var tableTile;
+var myTableName;
+var mySocketName;
+var myLeaderName;
+var myLeftName;
+var myRightName;
+var myOppositeName;
 const PlayRoom = (props) => {
     var user;
     var room;
@@ -124,16 +132,102 @@ const PlayRoom = (props) => {
     const drop = (e) => {
         e.preventDefault()
 
-        var data = e.dataTransfer.getData("id");
-        var s = document.getElementById(data);
-        var tempNumber = e.target.innerHTML
-        var tempColor = e.target.style.color
-        e.target.innerHTML = s.innerHTML
-        e.target.style.color = s.style.color
-        s.innerHTML = tempNumber
-        s.style.color = tempColor
+        var data = e.dataTransfer.getData("id")
+        var s = document.getElementById(data)
+        if (s.id === "left") {
+            if (e.target.id === "middle" || e.target.id === "right") {
+                return
+            }
 
-        e.target.src = s.src;
+            var tempNumber = e.target.innerHTML
+            var tempColor = e.target.style.color
+            e.target.innerHTML = s.innerHTML
+            e.target.style.color = s.style.color
+
+            socket.emit("requestLeftTable", mySocketName, myLeaderName)
+
+            s.innerHTML = "new"
+            s.style.color = "cyan"
+
+            e.target.src = s.src
+        }
+        else if (s.id === "middle") {
+            if (e.target.id === "left" || e.target.id === "right") {
+                return
+            }
+
+            if (e.target.innerHTML) {
+                return
+            }
+            var tempNumber = e.target.innerHTML
+            var tempColor = e.target.style.color
+
+            socket.emit("requestTableTile", mySocketName, myLeaderName)
+
+            socket.on("getTableTile", (client, leader, tile) => {
+                console.log("getTableTile:", client, leader, tile)
+                console.log("e.target:", e.target)
+                socket.off("getTableTile")
+
+                let split = tile.split("-")
+                let color = split[0]
+                let number = split[1]
+
+                e.target.innerHTML = number.substring(0, number.length - 1)
+                if (color === "fake") {
+                    e.target.style.color = "green"
+                    e.target.innerHTML = "Fake"
+                }
+                else if (color === "red") {
+                    e.target.style.color = "red"
+                }
+                else if (color === "yellow") {
+                    e.target.style.color = "#d6bc13"
+                }
+                else if (color === "blue") {
+                    e.target.style.color = "blue"
+                }
+                else if (color === "black") {
+                    e.target.style.color = "black"
+                }
+
+                e.target.src = s.src
+            })
+
+
+        }
+        else if (s.id === "right") {
+            return
+        }
+        else {
+            if (e.target.id === "left" || e.target.id === "middle") {
+                return
+            }
+            else if (e.target.id === "right") {
+                var cell = document.getElementsByClassName("cell1")
+                cell["0"].innerHTML = s.innerHTML
+                cell["0"].style.color = s.style.color
+
+                e.target.innerHTML = s.innerHTML
+                e.target.style.color = s.style.color
+
+                socket.emit("sendToRight", mySocketName, myLeaderName, myLeftName, myRightName, myOppositeName, s.style.color + "-" + s.innerHTML)
+
+                s.innerHTML = ""
+                s.style.color = ""
+
+                e.target.src = s.src
+                return
+            }
+            var tempNumber = e.target.innerHTML
+            var tempColor = e.target.style.color
+            e.target.innerHTML = s.innerHTML
+            e.target.style.color = s.style.color
+            s.innerHTML = tempNumber
+            s.style.color = tempColor
+
+            e.target.src = s.src
+        }
     }
 
     useEffect(() => {
@@ -152,8 +246,22 @@ const PlayRoom = (props) => {
             upgrade: false
         })
 
-        socket.on("getTile", (myTile) => {
-            console.log("getTile:", myTile)
+        socket.on("getTile", (mTile, tName, sName, lName, tableMap) => {
+            console.log("getTile:", mTile, tName)
+            myTile = mTile
+            myTableName = tName
+            mySocketName = sName
+            myLeaderName = lName
+            myLeftName = tableMap["left"]
+            myRightName = tableMap["right"]
+            myOppositeName = tableMap["middle"]
+
+            console.log("not leader", myTableName,
+                mySocketName,
+                myLeaderName,
+                myLeftName,
+                myRightName,
+                myOppositeName)
 
             myTile.map((tile, index) => {
                 let i = index + 1
@@ -181,19 +289,34 @@ const PlayRoom = (props) => {
             })
         })
 
-        socket.on("leader", (otherClients, room) => {
-            console.log("I'm leader", otherClients, "...room:", room, "...")
+        socket.on("leader", (otherClients, room, sName, tableMap) => {
+            console.log("I'm leader", otherClients, "...room:", room, "...", "lName:", sName, "...")
+            myTableName = "c_table"
+            mySocketName = sName
+            myLeaderName = sName
+            myLeftName = tableMap["2"]["left"]
+            myRightName = tableMap["2"]["right"]
+            myOppositeName = tableMap["2"]["middle"]
+
+            console.log("leader", myTableName,
+                mySocketName,
+                myLeaderName,
+                myLeftName,
+                myRightName,
+                myOppositeName)
 
             var a = _.sample(allTiles, 15)
             var b = _.sample(_.without(allTiles, ...a), 14)
             var c = _.sample(_.without(_.without(allTiles, ...a), ...b), 14)
             var d = _.sample(_.without(_.without(_.without(allTiles, ...a), ...b), ...c), 14)
-            const a_table = a.map(e => Object.keys(e)[0])
-            const b_table = b.map(e => Object.keys(e)[0])
-            const c_table = c.map(e => Object.keys(e)[0])
-            const d_table = d.map(e => Object.keys(e)[0])
+            var other = _.without(_.without(_.without(_.without(allTiles, ...a), ...b), ...c), ...d)
+            const a_tile = a.map(e => Object.keys(e)[0])
+            const b_tile = b.map(e => Object.keys(e)[0])
+            const c_tile = c.map(e => Object.keys(e)[0])
+            const d_tile = d.map(e => Object.keys(e)[0])
+            tableTile = _.shuffle(other.map(e => Object.keys(e)[0]))
 
-            a_table.map((tile, index) => {
+            a_tile.map((tile, index) => {
                 let i = index + 1
                 let entry = document.getElementById(i.toString())
                 let split = tile.split("-")
@@ -218,7 +341,50 @@ const PlayRoom = (props) => {
                 }
             })
 
-            socket.emit("tilesReady", otherClients, room, [b_table, c_table, d_table])
+            socket.emit("tilesReady", otherClients, room, [b_tile, c_tile, d_tile], sName, tableMap)
+        })
+
+        socket.on("pickTableTile", (client, leader) => {
+            var tile = tableTile.shift()
+
+            console.log("pickTableTile", client, leader, tile)
+            socket.emit("sendTableTile", client, leader, tile)
+        })
+
+        socket.on("sendRight", (client, leader, left, right, middle, tile) => {
+            var color = tile.split("-")[0]
+            var number = tile.split("-")[1]
+            if (mySocketName === client) {
+                var cell = document.getElementsByClassName("cell1")
+                cell["0"].innerHTML = number
+                cell["0"].style.color = color
+
+                var entry = document.getElementById("right")
+                entry.innerHTML = number
+                entry.style.color = color
+            }
+            else if (mySocketName === left) {
+                var cell = document.getElementsByClassName("cell0")
+                console.log("cell", cell)
+                cell["0"].innerHTML = number
+                cell["0"].style.color = color
+            }
+            else if (mySocketName === right) {
+                var cell = document.getElementsByClassName("cell2")
+                console.log("cell", cell)
+                cell["0"].innerHTML = number
+                cell["0"].style.color = color
+                
+                var entry = document.getElementById("left")
+                entry.innerHTML = number
+                entry.style.color = color
+            }
+            else if (mySocketName === middle) {
+                var cell = document.getElementsByClassName("cell3")
+                console.log("cell", cell)
+                cell["0"].innerHTML = number
+                cell["0"].style.color = color
+            }
         })
 
         console.log("user: " + user + ", roomID: " + room)
@@ -231,6 +397,11 @@ const PlayRoom = (props) => {
             <input type="submit" value="I'm ready" onClick={() => socket.emit("imready", { user, room })} />
 
             <div className="okeyTable">
+
+                <div className="cell0" style={{ color: "blue" }}></div>
+                <div className="cell1" style={{ color: "brown" }}></div>
+                <div className="cell2" style={{ color: "green" }}></div>
+                <div className="cell3" style={{ color: "cyan" }}></div>
 
                 <div className="rectangleA"></div>
                 <div className="rectangleB"></div>
@@ -256,92 +427,122 @@ const PlayRoom = (props) => {
                         </tr>
                     </thead>
                     <tbody key={"d"}>
-                        <tr>
+                        <tr className="gamePlay">
                             <td
-                                id="1"
+                                id="left"
                                 draggable={true}
                                 onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
                                 onDragOver={(e) => e.preventDefault()}
-                            />
+                                colSpan="4"
+                                style={{ textAlign: "center" }}
+                            >
+                                LEFT
+                                </td>
                             <td
-                                id="2"
+                                id="middle"
                                 draggable={true}
                                 onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
                                 onDragOver={(e) => e.preventDefault()}
-                            />
+                                colSpan="6"
+                                style={{ textAlign: "center" }}
+                            >
+                                MIDDLE
+                                </td>
                             <td
-                                id="3"
+                                id="right"
                                 draggable={true}
                                 onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
                                 onDragOver={(e) => e.preventDefault()}
-                            />
-                            <td
-                                id="4"
-                                draggable={true}
-                                onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
-                                onDragOver={(e) => e.preventDefault()}
-                            />
-                            <td
-                                id="5"
-                                draggable={true}
-                                onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
-                                onDragOver={(e) => e.preventDefault()}
-                            />
-                            <td
-                                id="6"
-                                draggable={true}
-                                onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
-                                onDragOver={(e) => e.preventDefault()}
-                            />
-                            <td
-                                id="7"
-                                draggable={true}
-                                onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
-                                onDragOver={(e) => e.preventDefault()}
-                            />
-                            <td
-                                id="8"
-                                draggable={true}
-                                onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
-                                onDragOver={(e) => e.preventDefault()}
-                            />
-                            <td
-                                id="9"
-                                draggable={true}
-                                onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
-                                onDragOver={(e) => e.preventDefault()}
-                            />
-                            <td
-                                id="10"
-                                draggable={true}
-                                onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
-                                onDragOver={(e) => e.preventDefault()}
-                            />
-                            <td
-                                id="11"
-                                draggable={true}
-                                onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
-                                onDragOver={(e) => e.preventDefault()}
-                            />
-                            <td
-                                id="12"
-                                draggable={true}
-                                onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
-                                onDragOver={(e) => e.preventDefault()}
-                            />
-                            <td
-                                id="13"
-                                draggable={true}
-                                onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
-                                onDragOver={(e) => e.preventDefault()}
-                            />
-                            <td
-                                id="14"
-                                draggable={true}
-                                onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
-                                onDragOver={(e) => e.preventDefault()}
-                            />
+                                colSpan="4"
+                                style={{ textAlign: "center" }}
+                            >
+                                RIGHT
+                                </td>
                         </tr>
+                        <td
+                            id="1"
+                            draggable={true}
+                            onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                            onDragOver={(e) => e.preventDefault()}
+                        />
+                        <td
+                            id="2"
+                            draggable={true}
+                            onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                            onDragOver={(e) => e.preventDefault()}
+                        />
+                        <td
+                            id="3"
+                            draggable={true}
+                            onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                            onDragOver={(e) => e.preventDefault()}
+                        />
+                        <td
+                            id="4"
+                            draggable={true}
+                            onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                            onDragOver={(e) => e.preventDefault()}
+                        />
+                        <td
+                            id="5"
+                            draggable={true}
+                            onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                            onDragOver={(e) => e.preventDefault()}
+                        />
+                        <td
+                            id="6"
+                            draggable={true}
+                            onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                            onDragOver={(e) => e.preventDefault()}
+                        />
+                        <td
+                            id="7"
+                            draggable={true}
+                            onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                            onDragOver={(e) => e.preventDefault()}
+                        />
+                        <td
+                            id="8"
+                            draggable={true}
+                            onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                            onDragOver={(e) => e.preventDefault()}
+                        />
+                        <td
+                            id="9"
+                            draggable={true}
+                            onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                            onDragOver={(e) => e.preventDefault()}
+                        />
+                        <td
+                            id="10"
+                            draggable={true}
+                            onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                            onDragOver={(e) => e.preventDefault()}
+                        />
+                        <td
+                            id="11"
+                            draggable={true}
+                            onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                            onDragOver={(e) => e.preventDefault()}
+                        />
+                        <td
+                            id="12"
+                            draggable={true}
+                            onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                            onDragOver={(e) => e.preventDefault()}
+                        />
+                        <td
+                            id="13"
+                            draggable={true}
+                            onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                            onDragOver={(e) => e.preventDefault()}
+                        />
+                        <td
+                            id="14"
+                            draggable={true}
+                            onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                            onDragOver={(e) => e.preventDefault()}
+                        />
                         <tr>
                             <td
                                 id="15"
@@ -444,7 +645,7 @@ const PlayRoom = (props) => {
                 <PlayerControl id="player-5" name="p5" />
                 <PlayerControl id="player-6" name="p6" />
             </PlayerBoard>
-        </div>
+        </div >
     )
 }
 

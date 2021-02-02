@@ -113,20 +113,96 @@ const allTiles = [
     { "fake-2": -2 },
 ]
 var socket;
+var table_tile;
+var my_left_tile;
+var my_right_tile;
 const Okey = ({ socket_old }) => {
+
     const drop = (e) => {
         e.preventDefault()
 
-        var data = e.dataTransfer.getData("id");
-        var s = document.getElementById(data);
-        var tempNumber = e.target.innerHTML
-        var tempColor = e.target.style.color
-        e.target.innerHTML = s.innerHTML
-        e.target.style.color = s.style.color
-        s.innerHTML = tempNumber
-        s.style.color = tempColor
+        var data = e.dataTransfer.getData("id")
+        var s = document.getElementById(data)
+        if (s.id === "left") {
+            if (e.target.id === "middle" || e.target.id === "right") {
+                return
+            }
 
-        e.target.src = s.src;
+            var tempNumber = e.target.innerHTML
+            var tempColor = e.target.style.color
+            e.target.innerHTML = s.innerHTML
+            e.target.style.color = s.style.color
+            s.innerHTML = "new"
+            s.style.color = "cyan"
+
+            e.target.src = s.src
+        }
+        else if (s.id === "middle") {
+            if (e.target.id === "left" || e.target.id === "right") {
+                return
+            }
+
+            if (e.target.innerHTML) {
+                return
+            }
+            var tempNumber = e.target.innerHTML
+            var tempColor = e.target.style.color
+            // e.target.innerHTML = s.innerHTML
+            // e.target.style.color = s.style.color
+            
+            console.log("fromTable", table_tile)
+            var fromTable = table_tile.shift()
+            let split = fromTable.split("-")
+            let color = split[0]
+            let number = split[1]
+            
+            e.target.innerHTML = number.substring(0, number.length - 1)
+            if (color === "fake") {
+                e.target.style.color = "green"
+                e.target.innerHTML = "Fake"
+            }
+            else if (color === "red") {
+                e.target.style.color = "red"
+            }
+            else if (color === "yellow") {
+                e.target.style.color = "#d6bc13"
+            }
+            else if (color === "blue") {
+                e.target.style.color = "blue"
+            }
+            else if (color === "black") {
+                e.target.style.color = "black"
+            }
+
+            e.target.src = s.src
+
+        }
+        else if (s.id === "right") {
+            return
+        }
+        else {
+            if (e.target.id === "left" || e.target.id === "middle") {
+                return
+            }
+            else if (e.target.id === "right") {
+                e.target.innerHTML = s.innerHTML
+                e.target.style.color = s.style.color
+
+                s.innerHTML = ""
+                s.style.color = ""
+
+                e.target.src = s.src
+                return
+            }
+            var tempNumber = e.target.innerHTML
+            var tempColor = e.target.style.color
+            e.target.innerHTML = s.innerHTML
+            e.target.style.color = s.style.color
+            s.innerHTML = tempNumber
+            s.style.color = tempColor
+
+            e.target.src = s.src
+        }
     }
 
     useEffect(() => {
@@ -134,20 +210,23 @@ const Okey = ({ socket_old }) => {
         var b = _.sample(_.without(allTiles, ...a), 14)
         var c = _.sample(_.without(_.without(allTiles, ...a), ...b), 14)
         var d = _.sample(_.without(_.without(_.without(allTiles, ...a), ...b), ...c), 14)
-        const a_table = a.map(e => Object.keys(e)[0])
-        const b_table = b.map(e => Object.keys(e)[0])
-        const c_table = c.map(e => Object.keys(e)[0])
-        const d_table = d.map(e => Object.keys(e)[0])
-        
+        var other = _.without(_.without(_.without(_.without(allTiles, ...a), ...b), ...c), ...d)
+        const a_tile = a.map(e => Object.keys(e)[0])
+        const b_tile = b.map(e => Object.keys(e)[0])
+        const c_tile = c.map(e => Object.keys(e)[0])
+        const d_tile = d.map(e => Object.keys(e)[0])
+        table_tile = _.shuffle(other.map(e => Object.keys(e)[0]))
+        console.log("len:", a_tile.length, b_tile.length, c_tile.length, d_tile.length, table_tile.length)
+        console.log("table_tile:", table_tile)
 
-        socket = io("http://localhost:4000/", {
-            transports: ['websocket', 'polling', 'flashsocket'],
-            upgrade: false
-        })
+        // socket = io("http://localhost:4000/", {
+        //     transports: ['websocket', 'polling', 'flashsocket'],
+        //     upgrade: false
+        // })
 
-        socket.emit("tilesReady", {a_table, b_table, c_table, d_table})
+        // socket.emit("tilesReady", { a_table, b_table, c_table, d_table })
 
-        d_table.map((tile, index) => {
+        a_tile.map((tile, index) => {
             let i = index + 1
             let entry = document.getElementById(i.toString())
             let split = tile.split("-")
@@ -194,6 +273,39 @@ const Okey = ({ socket_old }) => {
                 </tr>
             </thead>
             <tbody key={"d"}>
+                <tr className="gamePlay">
+                    <td
+                        id="left"
+                        draggable={true}
+                        onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                        onDragOver={(e) => e.preventDefault()}
+                        colSpan="4"
+                        style={{ textAlign: "center" }}
+                    >
+                        LEFT
+                    </td>
+                    <td
+                        id="middle"
+                        draggable={true}
+                        onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                        onDragOver={(e) => e.preventDefault()}
+                        colSpan="6"
+                        style={{ textAlign: "center" }}
+                    >
+                        MIDDLE
+                    </td>
+                    <td
+                        id="right"
+                        draggable={true}
+                        onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                        onDragOver={(e) => e.preventDefault()}
+                        colSpan="4"
+                        style={{ textAlign: "center" }}
+                    >
+                        RIGHT
+                    </td>
+                </tr>
+
                 <tr>
                     <td
                         id="1"

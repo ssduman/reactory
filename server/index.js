@@ -85,17 +85,6 @@ io.on('connection', (socket) => {
         socket.broadcast.emit("messageSend", message)
     })
 
-    socket.on('disconnect', () => {
-        console.log('user disconnected')
-        socket.removeAllListeners()
-    })
-
-    socket.on("tilesReady", (otherClients, room, tiles) => {
-        io.to(otherClients[0]).emit("getTile", tiles[0])
-        io.to(otherClients[1]).emit("getTile", tiles[1])
-        io.to(otherClients[2]).emit("getTile", tiles[2])
-    })
-
     socket.on("imready", (user, room) => {
         console.log(user + " joined in " + room)
         socket.join(room)
@@ -105,14 +94,60 @@ io.on('connection', (socket) => {
 
         if (numClients === 4) {
             let others =  Array.from(clients)
-            console.log("1:", others)
+            let tableMap = {
+                "0": {
+                    "left": others[1],
+                    "right": others[3],
+                    "middle": others[2]
+                },
+                "1": {
+                    "left": others[2],
+                    "right": others[0],
+                    "middle": others[3]
+                },
+                "2": {
+                    "left": others[3],
+                    "right": others[1],
+                    "middle": others[0]
+                },
+                "3": {
+                    "left": others[0],
+                    "right": others[2],
+                    "middle": others[1]
+                }
+            }
+            let leader = Array.from(clients)[2]
             others.splice(2, 1)
-            console.log("2:", others)
-            io.to(Array.from(clients)[2]).emit("leader", others, room)
+            io.to(leader).emit("leader", others, room, leader, tableMap)
         }
     })
 
+    socket.on("tilesReady", (otherClients, room, tiles, lName, tableMap) => {
+        io.to(otherClients[0]).emit("getTile", tiles[0], "a_table", otherClients[0], lName, tableMap["0"])
+        io.to(otherClients[1]).emit("getTile", tiles[1], "b_table", otherClients[1], lName, tableMap["1"])
+        io.to(otherClients[2]).emit("getTile", tiles[2], "d_table", otherClients[2], lName, tableMap["3"])
+    })
 
+    socket.on("requestTableTile", (client, leader) => {
+        console.log("requestTableTile", client, leader)
+        io.to(leader).emit("pickTableTile", client, leader)
+    })
+
+    socket.on("sendTableTile", (client, leader, tile) => {
+        console.log("sendTableTile", client, leader, tile)
+        io.to(client).emit("getTableTile", client, leader, tile)
+    })
+
+    socket.on("sendToRight", (client, leader, left, right, middle, tile) => {
+        console.log("sendToRight", client, leader, left, right, middle, tile)
+        // io.to(right).emit("getTableTile", client, leader, tile)
+        socket.broadcast.emit("sendRight", client, leader, left, right, middle, tile)
+    })
+
+    socket.on('disconnect', () => {
+        console.log('user disconnected')
+        socket.removeAllListeners()
+    })
 })
 
 app.get('/api', authenticateToken, (req, res) => {

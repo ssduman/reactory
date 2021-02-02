@@ -25,6 +25,7 @@
   left: 20px;
   position: absolute;
 }
+
 .rectangleB {
   width: 200px;
   height: 100px;
@@ -36,6 +37,7 @@
   left: 150px;
   position: absolute;
 }
+
 .rectangleC {
   width: 100px;
   height: 200px;
@@ -55,6 +57,54 @@
   width: 60%;
   top: 350px;
   left: 100px;
+  position: absolute;
+}
+
+.cell0 {
+  width: 20px;
+  height: 40px;
+  border-color: blue;
+  border-width: 10px;
+  stroke: black;
+  border: solid;
+  top: 140px;
+  left: 320px;
+  position: absolute;
+}
+
+.cell1 {
+  width: 20px;
+  height: 40px;
+  border-color: brown;
+  border-width: 10px;
+  stroke: black;
+  border: solid;
+  top: 280px;
+  left: 320px;
+  position: absolute;
+}
+
+.cell2 {
+  width: 20px;
+  height: 40px;
+  border-color: green;
+  border-width: 10px;
+  stroke: black;
+  border: solid;
+  top: 280px;
+  left: 150px;
+  position: absolute;
+}
+
+.cell3 {
+  width: 20px;
+  height: 40px;
+  border-color: cyan;
+  border-width: 10px;
+  stroke: black;
+  border: solid;
+  top: 140px;
+  left: 150px;
   position: absolute;
 }
 
@@ -81,6 +131,10 @@ table,
 th,
 td {
   border: 1px solid black;
+}
+
+.gamePlay td {
+  border: 0px;
 }
 
 .App {
