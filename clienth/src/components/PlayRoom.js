@@ -2,13 +2,8 @@ import React from 'react'
 import { useState, useEffect } from "react"
 import _ from 'underscore'
 import '../App.css'
-import PlayerBoard from "./PlayerBoard"
-import PlayerControl from "./PlayerControl"
 import queryString from 'query-string'
 import { io } from "socket.io-client"
-
-// require('dotenv').config()
-// const port = process.env.PORT || 48459
 
 const allTiles = [
     { "red-1a": 1 },
@@ -131,8 +126,7 @@ var myOppositeName;
 var myTurn = false
 var tileAllowed = false
 var myLeftTileStack = []
-var myRightTileStack = []
-const PlayRoom = (props) => {
+const PlayRoom = () => {
     var user;
     var room;
 
@@ -281,22 +275,11 @@ const PlayRoom = (props) => {
     }
 
     useEffect(() => {
-        user = props.user
         room = queryString.parse(window.location.search).room
-
-        if (props.user) {
-            localStorage.setItem("name", user)
-        }
-        else {
-            user = localStorage.getItem("name")
-        }
-
-        // socket = io("https://samd.herokuapp.com:" + port + "/", {
-        //     transports: ['websocket', 'polling', 'flashsocket'],
-        //     upgrade: false
-        // })
+        console.log("room:", room)
 
         socket = io("/")
+        console.log("socket:", socket)
 
         socket.on("getTile", (mTile, tName, sName, lName, tableMap, okey) => {
             myTile = mTile
@@ -463,11 +446,9 @@ const PlayRoom = (props) => {
             }
         })
 
-        console.log("user: " + user + ", roomID: " + room)
+        console.log("1) user: " + user + ", roomID: " + room)
     }, [])
 
-    // <form onSubmit={(e) => socket.emit("imready", { user, room })}>
-    // </form>
     return (
         <div>
             <input type="submit" value="I'm ready" onClick={() => socket.emit("imready", { user, room })} />
@@ -515,7 +496,7 @@ const PlayRoom = (props) => {
                                 style={{ textAlign: "center" }}
                             >
                                 LEFT
-                                </td>
+                            </td>
                             <td
                                 id="middle"
                                 draggable={true}
@@ -525,7 +506,7 @@ const PlayRoom = (props) => {
                                 style={{ textAlign: "center" }}
                             >
                                 MIDDLE
-                                </td>
+                            </td>
                             <td
                                 id="right"
                                 draggable={true}
@@ -535,92 +516,94 @@ const PlayRoom = (props) => {
                                 style={{ textAlign: "center" }}
                             >
                                 RIGHT
-                                </td>
+                            </td>
                         </tr>
-                        <td
-                            id="1"
-                            draggable={true}
-                            onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
-                            onDragOver={(e) => e.preventDefault()}
-                        />
-                        <td
-                            id="2"
-                            draggable={true}
-                            onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
-                            onDragOver={(e) => e.preventDefault()}
-                        />
-                        <td
-                            id="3"
-                            draggable={true}
-                            onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
-                            onDragOver={(e) => e.preventDefault()}
-                        />
-                        <td
-                            id="4"
-                            draggable={true}
-                            onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
-                            onDragOver={(e) => e.preventDefault()}
-                        />
-                        <td
-                            id="5"
-                            draggable={true}
-                            onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
-                            onDragOver={(e) => e.preventDefault()}
-                        />
-                        <td
-                            id="6"
-                            draggable={true}
-                            onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
-                            onDragOver={(e) => e.preventDefault()}
-                        />
-                        <td
-                            id="7"
-                            draggable={true}
-                            onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
-                            onDragOver={(e) => e.preventDefault()}
-                        />
-                        <td
-                            id="8"
-                            draggable={true}
-                            onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
-                            onDragOver={(e) => e.preventDefault()}
-                        />
-                        <td
-                            id="9"
-                            draggable={true}
-                            onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
-                            onDragOver={(e) => e.preventDefault()}
-                        />
-                        <td
-                            id="10"
-                            draggable={true}
-                            onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
-                            onDragOver={(e) => e.preventDefault()}
-                        />
-                        <td
-                            id="11"
-                            draggable={true}
-                            onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
-                            onDragOver={(e) => e.preventDefault()}
-                        />
-                        <td
-                            id="12"
-                            draggable={true}
-                            onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
-                            onDragOver={(e) => e.preventDefault()}
-                        />
-                        <td
-                            id="13"
-                            draggable={true}
-                            onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
-                            onDragOver={(e) => e.preventDefault()}
-                        />
-                        <td
-                            id="14"
-                            draggable={true}
-                            onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
-                            onDragOver={(e) => e.preventDefault()}
-                        />
+                        <tr>
+                            <td
+                                id="1"
+                                draggable={true}
+                                onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                                onDragOver={(e) => e.preventDefault()}
+                            />
+                            <td
+                                id="2"
+                                draggable={true}
+                                onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                                onDragOver={(e) => e.preventDefault()}
+                            />
+                            <td
+                                id="3"
+                                draggable={true}
+                                onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                                onDragOver={(e) => e.preventDefault()}
+                            />
+                            <td
+                                id="4"
+                                draggable={true}
+                                onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                                onDragOver={(e) => e.preventDefault()}
+                            />
+                            <td
+                                id="5"
+                                draggable={true}
+                                onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                                onDragOver={(e) => e.preventDefault()}
+                            />
+                            <td
+                                id="6"
+                                draggable={true}
+                                onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                                onDragOver={(e) => e.preventDefault()}
+                            />
+                            <td
+                                id="7"
+                                draggable={true}
+                                onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                                onDragOver={(e) => e.preventDefault()}
+                            />
+                            <td
+                                id="8"
+                                draggable={true}
+                                onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                                onDragOver={(e) => e.preventDefault()}
+                            />
+                            <td
+                                id="9"
+                                draggable={true}
+                                onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                                onDragOver={(e) => e.preventDefault()}
+                            />
+                            <td
+                                id="10"
+                                draggable={true}
+                                onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                                onDragOver={(e) => e.preventDefault()}
+                            />
+                            <td
+                                id="11"
+                                draggable={true}
+                                onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                                onDragOver={(e) => e.preventDefault()}
+                            />
+                            <td
+                                id="12"
+                                draggable={true}
+                                onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                                onDragOver={(e) => e.preventDefault()}
+                            />
+                            <td
+                                id="13"
+                                draggable={true}
+                                onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                                onDragOver={(e) => e.preventDefault()}
+                            />
+                            <td
+                                id="14"
+                                draggable={true}
+                                onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                                onDragOver={(e) => e.preventDefault()}
+                            />
+                        </tr>
                         <tr>
                             <td
                                 id="15"
@@ -711,18 +694,6 @@ const PlayRoom = (props) => {
                 </table>
             </div>
 
-            <p>team A</p>
-            <PlayerBoard id="team-1">
-                <PlayerControl id="player-1" name="p1" />
-                <PlayerControl id="player-2" name="p2" isAdmin={true} />
-                <PlayerControl id="player-3" name="p3" />
-            </PlayerBoard>
-            <p>team B</p>
-            <PlayerBoard id="team-2">
-                <PlayerControl id="player-4" name="p4" />
-                <PlayerControl id="player-5" name="p5" />
-                <PlayerControl id="player-6" name="p6" />
-            </PlayerBoard>
         </div >
     )
 }

@@ -1,16 +1,12 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-/cert
 /node_modules
-/.pnp
-/public
-.pnp.js
-/server
 /client
-
-#env
-.env
+.vscode
+/.vscode
+/.pnp
+.pnp.js
 
 # testing
 /coverage
@@ -25,6 +21,8 @@
 .env.development.local
 .env.test.local
 .env.production.local
+start-mysql.bat
+stop-mysql.bat
 
 npm-debug.log*
 yarn-debug.log*
