@@ -220,7 +220,7 @@ function App() {
 
         checkToken()
 
-        socket = io("http://localhost:4000/", {
+        socket = io("https://samd.herokuapp.com:4000/", {
             transports: ['websocket', 'polling', 'flashsocket'],
             upgrade: false
         })
@@ -245,7 +245,7 @@ function App() {
             socket.emit("disconnet")
             socket.off()
         }
-    }, ["http://localhost:4000/"]
+    }, ["https://samd.herokuapp.com:4000/"]
     )
 
     return (

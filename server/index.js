@@ -7,7 +7,7 @@ const http = require('http').createServer(app)
 // }, app).listen(3443)
 const io = require('socket.io')(http, {
     cors: {
-        origin: "http://localhost:3000",
+        origin: "https://samd.herokuapp.com:3000",
     }
 })
 // io.configure(function () {
@@ -35,7 +35,7 @@ app.use(session({
     secret: 'Usq23A1d8Fyy'
 }));
 
-const port = process.env.PORT || 4000
+const port = process.env.PORT || 48459
 
 // const connection = mysql.createConnection({
 //     host: process.env.DB_HOST,
