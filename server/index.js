@@ -161,6 +161,10 @@ io.on('connection', (socket) => {
     })
 })
 
+app.get("/", (req, res) => {
+    res.send("server running")
+})
+
 app.get('/api', authenticateToken, (req, res) => {
     res.json(req.user)
 })
