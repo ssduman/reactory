@@ -10,6 +10,10 @@ const io = require('socket.io')(http, {
         origin: "http://localhost:3000",
     }
 })
+io.configure(function () {
+    io.set("transports", ["xhr-polling"]);
+    io.set("polling duration", 10);
+})
 const bodyParser = require("body-parser")
 const cors = require('cors')
 // const mysql = require('mysql')
@@ -93,7 +97,7 @@ io.on('connection', (socket) => {
         const numClients = clients ? clients.size : 0
 
         if (numClients === 4) {
-            let others =  Array.from(clients)
+            let others = Array.from(clients)
             let tableMap = {
                 "0": {
                     "left": others[1],
