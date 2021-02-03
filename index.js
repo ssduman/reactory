@@ -1,4 +1,5 @@
 require('dotenv').config()
+const path = require("path")
 const express = require("express")
 const http = require("http")
 const app = express()
@@ -95,6 +96,12 @@ io.on('connection', (socket) => {
         console.log('user disconnected')
         socket.removeAllListeners()
     })
+})
+
+app.use(express.static(path.join(__dirname, "/clienth/build")))
+
+app.get('/*', (req, res) => {
+    res.sendFile(path.join(__dirname, "/clienth/build"))
 })
 
 const port = process.env.PORT || 8000

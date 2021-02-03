@@ -13,6 +13,7 @@ function App() {
             <Route path="/" exact render={(probs) =>
             (
                 <>
+                    <PlayRoom />
                     <Footer />
                 </>
             )} />
@@ -20,7 +21,6 @@ function App() {
             <Route path="/play" exact render={(probs) =>
             (
                 <>
-                    <PlayRoom />
                 </>
             )} />
         </Router>
