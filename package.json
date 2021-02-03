@@ -8,7 +8,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "postinstall": "cd ./clienth && npm start"
+    "postinstall": "cd ./clienth && npm install && npm run build"
   },
   "keywords": [],
   "author": "",
