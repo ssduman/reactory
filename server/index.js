@@ -12,8 +12,8 @@ const io = require('socket.io')(http, {
 })
 const bodyParser = require("body-parser")
 const cors = require('cors')
-const mysql = require('mysql')
-const bcrypt = require('bcrypt')
+// const mysql = require('mysql')
+// const bcrypt = require('bcrypt')
 const session = require('express-session')
 const cookieParser = require('cookie-parser')
 const jwt = require("jsonwebtoken")
@@ -33,23 +33,23 @@ app.use(session({
 
 const port = process.env.PORT || 4000
 
-const connection = mysql.createConnection({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASS,
-    database: process.env.DB_NAME
-})
-connection.connect()
+// const connection = mysql.createConnection({
+//     host: process.env.DB_HOST,
+//     user: process.env.DB_USER,
+//     password: process.env.DB_PASS,
+//     database: process.env.DB_NAME
+// })
+// connection.connect()
 
-const sqlQuery = (query, callback) => {
-    connection.query(query, (error, results, fields) => {
-        if (error) {
-            throw error
-        }
+// const sqlQuery = (query, callback) => {
+//     connection.query(query, (error, results, fields) => {
+//         if (error) {
+//             throw error
+//         }
 
-        return callback(results)
-    })
-}
+//         return callback(results)
+//     })
+// }
 
 const generateAccessToken = (name) => {
     return jwt.sign(name, process.env.TOKEN_SECRET, { expiresIn: '1800s' })
@@ -165,31 +165,31 @@ app.post('/api/login', async (req, res, next) => {
     const name = req.body.name
     const email = req.body.email
     const password = req.body.password
-    sqlQuery('SELECT * FROM react_web.users WHERE name = "' + name + '"', async (results) => {
-        if (!results || results === [] || results.length === 0) {
-            res.status(501).send("cannot find user")
-        }
-        else {
-            try {
-                if (await bcrypt.compare(password, results[0].password)) {
-                    req.session.regenerate(() => {
-                        req.session.user = results[0]
-                    })
-                    res.status(200)
-                    // res.append('Set-Cookie', 'divehours=fornightly')
-                    res.json(generateAccessToken({ name: name }))
-                }
-                else {
-                    console.log("hash wrong")
-                    res.status(502).send("not correct")
-                }
-            }
-            catch {
-                console.log("catchin")
-                res.status(500).send()
-            }
-        }
-    })
+    // sqlQuery('SELECT * FROM react_web.users WHERE name = "' + name + '"', async (results) => {
+    //     if (!results || results === [] || results.length === 0) {
+    //         res.status(501).send("cannot find user")
+    //     }
+    //     else {
+    //         try {
+    //             if (await bcrypt.compare(password, results[0].password)) {
+    //                 req.session.regenerate(() => {
+    //                     req.session.user = results[0]
+    //                 })
+    //                 res.status(200)
+    //                 // res.append('Set-Cookie', 'divehours=fornightly')
+    //                 res.json(generateAccessToken({ name: name }))
+    //             }
+    //             else {
+    //                 console.log("hash wrong")
+    //                 res.status(502).send("not correct")
+    //             }
+    //         }
+    //         catch {
+    //             console.log("catchin")
+    //             res.status(500).send()
+    //         }
+    //     }
+    // })
 })
 
 app.get('/api/logout', (req, res) => {
@@ -203,30 +203,30 @@ app.post('/api/signin', async (req, res) => {
     const email = req.body.email
     const password = req.body.password
     const regdate = req.body.regdate
-    try {
-        const hash = await bcrypt.hash(password, 10)
+    // try {
+    //     const hash = await bcrypt.hash(password, 10)
 
-        sqlQuery('SELECT * FROM react_web.users WHERE name = "' + name + '"', (results) => {
-            if (results.length > 0) {
-                res.status(501).send()
-            }
-            else {
-                const query = 'INSERT INTO react_web.users (name, email, password, regdate) VALUES ' +
-                    '(\"' + name + '\", \"' + email + '\", \"' + hash + '\", \"' + regdate + '\")';
+    //     sqlQuery('SELECT * FROM react_web.users WHERE name = "' + name + '"', (results) => {
+    //         if (results.length > 0) {
+    //             res.status(501).send()
+    //         }
+    //         else {
+    //             const query = 'INSERT INTO react_web.users (name, email, password, regdate) VALUES ' +
+    //                 '(\"' + name + '\", \"' + email + '\", \"' + hash + '\", \"' + regdate + '\")';
 
-                sqlQuery(query, (results) => {
-                    console.log("inserted new user: ", name)
-                })
+    //             sqlQuery(query, (results) => {
+    //                 console.log("inserted new user: ", name)
+    //             })
 
-                const token = generateAccessToken({ name: name })
-                res.status(201)
-                res.json(token)
-            }
-        })
-    }
-    catch {
-        res.status(500).send()
-    }
+    //             const token = generateAccessToken({ name: name })
+    //             res.status(201)
+    //             res.json(token)
+    //         }
+    //     })
+    // }
+    // catch {
+    //     res.status(500).send()
+    // }
 })
 
 app.post('/api/users', (req, res) => {
@@ -234,31 +234,31 @@ app.post('/api/users', (req, res) => {
     const email = req.body.email
     const password = req.body.password
     const regdate = req.body.regdate
-    const query = 'INSERT INTO react_web.users (name, email, password, regdate) VALUES ' +
-        '(\"' + name + '\", \"' + email + '\", \"' + password + '\", \"' + regdate + '\")';
+    // const query = 'INSERT INTO react_web.users (name, email, password, regdate) VALUES ' +
+    //     '(\"' + name + '\", \"' + email + '\", \"' + password + '\", \"' + regdate + '\")';
 
-    sqlQuery(query, (results) => {
-        res.json({ users: req.body })
-    })
+    // sqlQuery(query, (results) => {
+    //     res.json({ users: req.body })
+    // })
 })
 
 app.get('/api/users', (req, res) => {
-    sqlQuery('SELECT * FROM react_web.users', (results) => {
-        res.json({ users: results })
-    })
+    // sqlQuery('SELECT * FROM react_web.users', (results) => {
+    //     res.json({ users: results })
+    // })
 })
 
 app.get('/api/users/:id', (req, res) => {
     const id = req.params.id
-    sqlQuery('SELECT * FROM react_web.users WHERE id = ' + id, (results) => {
-        res.json({ user: results })
-    })
+    // sqlQuery('SELECT * FROM react_web.users WHERE id = ' + id, (results) => {
+    //     res.json({ user: results })
+    // })
 })
 
 app.get('/api/rooms', (req, res) => {
-    sqlQuery('SELECT * FROM react_web.room_table', (results) => {
-        res.json({ rooms: results })
-    })
+    // sqlQuery('SELECT * FROM react_web.room_table', (results) => {
+    //     res.json({ rooms: results })
+    // })
 })
 
 app.post('/api/rooms', (req, res) => {
@@ -266,41 +266,41 @@ app.post('/api/rooms', (req, res) => {
     const capacity = req.body.capacity
     const current_player = req.body.current_player
     const password = req.body.password
-    let query = 'INSERT INTO react_web.room_table (name, capacity, current_player, password) VALUES ' +
-        '(\"' + name + '\", \"' + capacity + '\", \"' + current_player + '\", \"' + password + '\")'
+    // let query = 'INSERT INTO react_web.room_table (name, capacity, current_player, password) VALUES ' +
+    //     '(\"' + name + '\", \"' + capacity + '\", \"' + current_player + '\", \"' + password + '\")'
 
-    sqlQuery(query, (results) => {
-        res.json({ room: { ...req.body, id: results.insertId } });
+    // sqlQuery(query, (results) => {
+    //     res.json({ room: { ...req.body, id: results.insertId } });
 
-        io.emit("db", results)
-    })
+    //     io.emit("db", results)
+    // })
 })
 
 app.put('/api/rooms/:id', (req, res) => {
-    let query = 'UPDATE react_web.room_table SET current_player = current_player + 1 WHERE id = ' + req.params.id
+    // let query = 'UPDATE react_web.room_table SET current_player = current_player + 1 WHERE id = ' + req.params.id
 
-    sqlQuery(query, (results) => {
-        res.json({ put: results })
+    // sqlQuery(query, (results) => {
+    //     res.json({ put: results })
 
-        io.emit("db", results)
-    })
+    //     io.emit("db", results)
+    // })
 })
 
 app.delete('/api/rooms/:id', (req, res) => {
     let query = 'DELETE FROM react_web.room_table WHERE id = ' + req.params.id
 
-    sqlQuery(query, (results) => {
-        res.json({ deleted: results })
+    // sqlQuery(query, (results) => {
+    //     res.json({ deleted: results })
 
-        io.emit("db", results)
-    })
+    //     io.emit("db", results)
+    // })
 })
 
 app.get('/api/rooms/:id', (req, res) => {
     const id = req.params.id
-    sqlQuery('SELECT * FROM react_web.room_table WHERE id = ' + id, (results) => {
-        res.json({ room: results })
-    })
+    // sqlQuery('SELECT * FROM react_web.room_table WHERE id = ' + id, (results) => {
+    //     res.json({ room: results })
+    // })
 })
 
 http.listen(port, () => {
