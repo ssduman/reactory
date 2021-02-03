@@ -20,7 +20,7 @@
     "web-vitals": "^0.2.4"
   },
   "scripts": {
-    "start": "npm run react && npm run server'",
+    "start": "npm run react && npm run server",
     "react": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
