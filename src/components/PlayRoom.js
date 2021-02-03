@@ -288,7 +288,7 @@ const PlayRoom = (props) => {
             user = localStorage.getItem("name")
         }
 
-        socket = io("https://samd.herokuapp.com:4000/", {
+        socket = io("https://samd.herokuapp.com:48459/", {
             transports: ['websocket', 'polling', 'flashsocket'],
             upgrade: false
         })
