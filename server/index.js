@@ -10,10 +10,10 @@ const io = require('socket.io')(http, {
         origin: "http://localhost:3000",
     }
 })
-io.configure(function () {
-    io.set("transports", ["xhr-polling"]);
-    io.set("polling duration", 10);
-})
+// io.configure(function () {
+//     io.set("transports", ["xhr-polling"]);
+//     io.set("polling duration", 10);
+// })
 const bodyParser = require("body-parser")
 const cors = require('cors')
 // const mysql = require('mysql')
