@@ -147,6 +147,10 @@ io.on('connection', (socket) => {
         io.to(right).emit("myTurn")
     })
 
+    socket.on("myLeftChanged", (client, leader, number, color) => {
+        socket.broadcast.emit("leftChanged", client, number, color)
+    })
+
     socket.on('disconnect', () => {
         console.log('user disconnected')
         socket.removeAllListeners()

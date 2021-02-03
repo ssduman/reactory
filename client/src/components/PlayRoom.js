@@ -138,6 +138,9 @@ const PlayRoom = (props) => {
 
         var data = e.dataTransfer.getData("id")
         var s = document.getElementById(data)
+        if (!s) {
+            return
+        }
         if (s.id === "left" && myTurn) {
             if (tileAllowed && myLeftTileStack.length > 0) {
                 if (e.target.id === "middle" || e.target.id === "right") {
@@ -149,8 +152,6 @@ const PlayRoom = (props) => {
                 e.target.innerHTML = s.innerHTML
                 e.target.style.color = s.style.color
 
-                socket.emit("requestLeftTable", mySocketName, myLeaderName)
-
                 myLeftTileStack.pop()
                 if (myLeftTileStack.length === 0) {
                     s.innerHTML = "LEFT"
@@ -160,6 +161,12 @@ const PlayRoom = (props) => {
                     s.innerHTML = myLeftTileStack[myLeftTileStack.length - 1][0]
                     s.style.color = myLeftTileStack[myLeftTileStack.length - 1][1]
                 }
+
+                var cell = document.getElementsByClassName("cell2")
+                cell["0"].innerHTML = s.innerHTML
+                cell["0"].style.color = s.style.color
+                
+                socket.emit("myLeftChanged", mySocketName, myLeaderName, s.innerHTML, s.style.color)
 
                 e.target.src = s.src
 
@@ -431,6 +438,24 @@ const PlayRoom = (props) => {
         socket.on("myTurn", () => {
             myTurn = true
             tileAllowed = true
+        })
+
+        socket.on("leftChanged", (client, number, color) => {
+            if (client === myLeftName) {
+                var cell = document.getElementsByClassName("cell3")
+                cell["0"].innerHTML = number
+                cell["0"].style.color = color
+            }
+            else if (client === myRightName) {
+                var cell = document.getElementsByClassName("cell1")
+                cell["0"].innerHTML = number
+                cell["0"].style.color = color
+            }
+            else if (client === myOppositeName) {
+                var cell = document.getElementsByClassName("cell0")
+                cell["0"].innerHTML = number
+                cell["0"].style.color = color
+            }
         })
 
         console.log("user: " + user + ", roomID: " + room)
