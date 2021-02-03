@@ -1,10 +1,10 @@
 const fs = require('fs')
 const app = require("express")()
 const http = require('http').createServer(app)
-const https = require('https').createServer({
-    key: fs.readFileSync('cert/key.pem'),
-    cert: fs.readFileSync('cert/cert.cert')
-}, app).listen(3443)
+// const https = require('https').createServer({
+//     key: fs.readFileSync('cert/key.pem'),
+//     cert: fs.readFileSync('cert/cert.cert')
+// }, app).listen(3443)
 const io = require('socket.io')(http, {
     cors: {
         origin: "http://localhost:3000",
