@@ -13,7 +13,9 @@ import Okey from "./components/Okey"
 import cookie from 'js-cookie'
 import { io } from "socket.io-client"
 
+// require('dotenv').config()
 var socket;
+const port = 48459
 function App() {
     const [rooms, setRooms] = useState([])
     const [user, setUser] = useState({ name: "", email: "" })

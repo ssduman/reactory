@@ -7,6 +7,9 @@ import PlayerControl from "./PlayerControl"
 import queryString from 'query-string'
 import { io } from "socket.io-client"
 
+// require('dotenv').config()
+// const port = process.env.PORT || 48459
+
 const allTiles = [
     { "red-1a": 1 },
     { "red-1b": 1 },
@@ -288,9 +291,14 @@ const PlayRoom = (props) => {
             user = localStorage.getItem("name")
         }
 
-        socket = io("https://samd.herokuapp.com:48459/", {
-            transports: ['websocket', 'polling', 'flashsocket'],
-            upgrade: false
+        // socket = io("https://samd.herokuapp.com:" + port + "/", {
+        //     transports: ['websocket', 'polling', 'flashsocket'],
+        //     upgrade: false
+        // })
+
+        socket = io('samd.herokuapp.com', {
+            path: '/socket.io-client',
+            transports: ['websocket']
         })
 
         socket.on("getTile", (mTile, tName, sName, lName, tableMap, okey) => {
