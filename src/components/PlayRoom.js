@@ -165,7 +165,7 @@ const PlayRoom = (props) => {
                 var cell = document.getElementsByClassName("cell2")
                 cell["0"].innerHTML = s.innerHTML
                 cell["0"].style.color = s.style.color
-                
+
                 socket.emit("myLeftChanged", mySocketName, myLeaderName, s.innerHTML, s.style.color)
 
                 e.target.src = s.src
@@ -288,7 +288,7 @@ const PlayRoom = (props) => {
             user = localStorage.getItem("name")
         }
 
-        socket = io("http://localhost:4000/", {
+        socket = io("https://samd.herokuapp.com:4000/", {
             transports: ['websocket', 'polling', 'flashsocket'],
             upgrade: false
         })
