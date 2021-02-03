@@ -296,10 +296,7 @@ const PlayRoom = (props) => {
         //     upgrade: false
         // })
 
-        socket = io('samd.herokuapp.com', {
-            path: '/socket.io-client',
-            transports: ['websocket']
-        })
+        socket = io("/")
 
         socket.on("getTile", (mTile, tName, sName, lName, tableMap, okey) => {
             myTile = mTile

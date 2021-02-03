@@ -5,13 +5,8 @@ const http = require('http').createServer(app)
 //     key: fs.readFileSync('cert/key.pem'),
 //     cert: fs.readFileSync('cert/cert.cert')
 // }, app).listen(3443)
-const io = require('socket.io')(http, {
-    cors: {
-        origin: "https://samd.herokuapp.com:3000",
-    },
-    path: '/socket.io-client'
-})
-io.set('transports', ['websocket']);
+const io = require('socket.io')(http)
+// io.set('transports', ['websocket']);
 // io.configure(function () {
 //     io.set("transports", ["xhr-polling"]);
 //     io.set("polling duration", 10);
