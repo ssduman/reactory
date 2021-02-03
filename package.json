@@ -20,12 +20,12 @@
     "web-vitals": "^0.2.4"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "concurrently 'npm run react' 'npm run server'",
+    "react": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "server": "json-server --watch db.json --port 5000",
-    "heroku-postbuild": "cd server && npm install && nodemon index.js"
+    "server": "cd server && node index.js"
   },
   "eslintConfig": {
     "extends": [
