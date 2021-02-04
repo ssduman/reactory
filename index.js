@@ -43,15 +43,15 @@ io.on('connection', (socket) => {
         console.log("imready:", user, " joined in ", room)
         socket.join(room)
 
-        const roomObj = {}
-        const roomList = io.sockets.adapter.rooms
-        for (r of roomList) {
-            if (r[0].length === 8) {
-                roomObj[r[0]] = Array.from(r[1])
-            }
-        }
-        console.log("1) roomObj:", roomObj)
-        socket.broadcast.emit("getAllRooms", roomObj)
+        // const roomObj = {}
+        // const roomList = io.sockets.adapter.rooms
+        // for (r of roomList) {
+        //     if (r[0].length === 8) {
+        //         roomObj[r[0]] = Array.from(r[1])
+        //     }
+        // }
+        // console.log("1) roomObj:", roomObj)
+        // socket.broadcast.emit("getAllRooms", roomObj)
 
         const clients = io.sockets.adapter.rooms.get(room);
         // console.log("clients in the room:", clients)
