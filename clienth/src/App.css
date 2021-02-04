@@ -1,15 +1,22 @@
 .uk-label,
 .uk-button {
-  border-radius: 10px;
+  border-radius: 10px !important;
 }
 
 .samd-border {
   border: 1px solid rgba(0, 0, 0, 0.075);
 }
 
+.samd-rounded {
+  border-radius: 10px;
+}
+.samd-rounded-bottom {
+  border-radius: 0 0 10px 10px;
+}
+
 .rectangle {
-  width: 600px;
-  height: 200px;
+  width: 1000px;
+  height: 600px;
   border-color: black;
   border-width: 10px;
   margin-left: 10px;
@@ -25,119 +32,141 @@
 
 .rectangleA {
   width: 100px;
-  height: 200px;
+  height: 250px;
   border-color: black;
   border-width: 10px;
   stroke: black;
   border: solid;
-  top: 100px;
-  left: 20px;
+  top: 50px;
+  left: -100px;
   position: absolute;
 }
 
 .rectangleB {
-  width: 200px;
+  width: 500px;
   height: 100px;
   border-color: black;
   border-width: 10px;
   stroke: black;
   border: solid;
-  top: 20px;
-  left: 150px;
+  top: -60px;
+  left: 50px;
   position: absolute;
 }
 
 .rectangleC {
   width: 100px;
-  height: 200px;
+  height: 250px;
   border-color: black;
   border-width: 10px;
   stroke: black;
   border: solid;
-  top: 100px;
-  left: 400px;
-  position: absolute;
-}
-
-.myTable {
-  border-collapse: collapse;
-  margin-top: 10px;
-  padding: 2px;
-  width: 60%;
-  top: 350px;
-  left: 100px;
+  top: 50px;
+  left: 600px;
   position: absolute;
 }
 
 .cell0 {
-  width: 20px;
-  height: 40px;
+  width: 30px;
+  height: 50px;
   border-color: blue;
   border-width: 10px;
   stroke: black;
   border: solid;
-  top: 140px;
-  left: 320px;
+  top: 80px;
+  left: 500px;
   position: absolute;
+  font-weight: bold;
+  font-size: 18px;
+  text-align: center;
 }
 
 .cell1 {
-  width: 20px;
-  height: 40px;
+  width: 30px;
+  height: 50px;
   border-color: brown;
   border-width: 10px;
   stroke: black;
   border: solid;
   top: 280px;
-  left: 320px;
+  left: 500px;
   position: absolute;
+  font-weight: bold;
+  font-size: 18px;
+  text-align: center;
 }
 
 .cell2 {
-  width: 20px;
-  height: 40px;
+  width: 30px;
+  height: 50px;
   border-color: green;
   border-width: 10px;
   stroke: black;
   border: solid;
   top: 280px;
-  left: 150px;
+  left: 70px;
   position: absolute;
+  font-weight: bold;
+  font-size: 18px;
+  text-align: center;
 }
 
 .cell3 {
-  width: 20px;
-  height: 40px;
+  width: 30px;
+  height: 50px;
   border-color: cyan;
   border-width: 10px;
   stroke: black;
   border: solid;
-  top: 140px;
-  left: 150px;
+  top: 80px;
+  left: 70px;
   position: absolute;
+  font-weight: bold;
+  font-size: 18px;
+  text-align: center;
 }
 
 .okeyTile {
-  width: 20px;
-  height: 40px;
+  width: 30px;
+  height: 50px;
   border-color: cyan;
   border-width: 10px;
   stroke: black;
   border: solid;
-  top: 200px;
-  left: 240px;
+  top: 175px;
+  left: 285px;
+  position: absolute;
+  text-align: center;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.myTable {
+  border-collapse: collapse;
+  top: 35px;
+  border: 0px;
   position: absolute;
 }
 
-body {
-  padding-left: 10px;
+table,
+th,
+td {
+  overflow: hidden;
+  border-collapse: collapse;
+  table-layout: fixed;
+  border: 0px solid black;
+  height: 30px;
+  font-weight: bold;
+  font-size: 18px;
 }
 
-table {
-  border-collapse: collapse;
-  margin-top: 10px;
-  padding: 2px;
-  width: 60%;
+td,
+th {
+  border: 1px solid black;
+}
+
+.gamePlay td {
+  border: 0px solid black;
 }
 
 textarea {
@@ -146,55 +175,4 @@ textarea {
 
 .chat-box {
   overflow-y: scroll;
-}
-
-table,
-th,
-td {
-  border: 1px solid black;
-  height: 20px;
-  width: 20px;
-}
-
-.gamePlay td {
-  border: 0px;
-}
-
-.App {
-  text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-}
-
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
 }

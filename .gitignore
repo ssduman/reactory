@@ -2,6 +2,7 @@
 
 # dependencies
 /cert
+/design
 /node_modules
 /.pnp
 /public

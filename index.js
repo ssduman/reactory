@@ -13,9 +13,22 @@ const io = socket(server, {
 
 io.on('connection', (socket) => {
     console.log('a user connected')
+    // console.log("all room:", io.sockets.adapter.rooms)
+    // console.log("socket.rooms:", socket.rooms)
 
-    socket.on("join", (name) => {
-        socket.broadcast.emit("join", name + " is joined from broadcast")
+    const roomObj = {}
+    const roomList = io.sockets.adapter.rooms
+    for (r of roomList) {
+        if (r[0].length === 8) {
+            roomObj[r[0]] = Array.from(r[1])
+        }
+    }
+    console.log("1) roomObj:", roomObj)
+    socket.broadcast.emit("getAllRooms", roomObj)
+
+    socket.on("joinRoom", (name, room) => {
+        console.log("i joined", room)
+        // socket.join(room)
     })
 
     socket.on("left", (name) => {
@@ -27,10 +40,21 @@ io.on('connection', (socket) => {
     })
 
     socket.on("imready", (user, room) => {
-        console.log(user + " joined in " + room)
+        console.log("imready:", user, " joined in ", room)
         socket.join(room)
 
+        const roomObj = {}
+        const roomList = io.sockets.adapter.rooms
+        for (r of roomList) {
+            if (r[0].length === 8) {
+                roomObj[r[0]] = Array.from(r[1])
+            }
+        }
+        console.log("1) roomObj:", roomObj)
+        socket.broadcast.emit("getAllRooms", roomObj)
+
         const clients = io.sockets.adapter.rooms.get(room);
+        // console.log("clients in the room:", clients)
         const numClients = clients ? clients.size : 0
 
         if (numClients === 4) {

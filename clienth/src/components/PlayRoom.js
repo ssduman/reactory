@@ -1,12 +1,13 @@
 import React from 'react'
 import { useState, useEffect } from "react"
 import _ from 'underscore'
-import '../App.css'
 import queryString from 'query-string'
 import { io } from "socket.io-client"
+import { v4 as uuidv4 } from 'uuid'
 import "../../node_modules/uikit/dist/js/uikit.min.js"
 import "../../node_modules/uikit/dist/js/uikit-icons.min.js"
 import "../../node_modules/uikit/dist/css/uikit.min.css"
+import '../App.css'
 
 const allTiles = [
     { "red-1a": 1 },
@@ -129,32 +130,36 @@ var myOppositeName;
 var myTurn = false
 var tileAllowed = false
 var myLeftTileStack = []
+var user;
+var room;
 const PlayRoom = () => {
-    var user;
-    var room;
+    const [allRooms, setRooms] = useState({ "asdasd": 2 })
 
     const drop = (e) => {
         e.preventDefault()
 
         var data = e.dataTransfer.getData("id")
         var s = document.getElementById(data)
+        var tempNumber;
+        var tempColor;
+        var cell;
         if (!s) {
             return
         }
         if (s.id === "left" && myTurn) {
             if (tileAllowed && myLeftTileStack.length > 0) {
-                if (e.target.id === "middle" || e.target.id === "right") {
+                if (e.target.id === "middle" || e.target.id === "right" || e.target.innerHTML) {
                     return
                 }
 
-                var tempNumber = e.target.innerHTML
-                var tempColor = e.target.style.color
+                tempNumber = e.target.innerHTML
+                tempColor = e.target.style.color
                 e.target.innerHTML = s.innerHTML
                 e.target.style.color = s.style.color
 
                 myLeftTileStack.pop()
                 if (myLeftTileStack.length === 0) {
-                    s.innerHTML = "LEFT"
+                    s.innerHTML = ""
                     s.style.color = "black"
                 }
                 else {
@@ -162,7 +167,7 @@ const PlayRoom = () => {
                     s.style.color = myLeftTileStack[myLeftTileStack.length - 1][1]
                 }
 
-                var cell = document.getElementsByClassName("cell2")
+                cell = document.getElementsByClassName("cell2")
                 cell["0"].innerHTML = s.innerHTML
                 cell["0"].style.color = s.style.color
 
@@ -173,7 +178,7 @@ const PlayRoom = () => {
                 tileAllowed = false
             }
             if (myLeftTileStack.length === 0) {
-                s.innerHTML = "LEFT"
+                s.innerHTML = ""
                 s.style.color = "black"
             }
         }
@@ -190,14 +195,12 @@ const PlayRoom = () => {
             }
 
             if (tileAllowed) {
-                var tempNumber = e.target.innerHTML
-                var tempColor = e.target.style.color
+                tempNumber = e.target.innerHTML
+                tempColor = e.target.style.color
 
                 socket.emit("requestTableTile", mySocketName, myLeaderName)
 
                 socket.on("getTableTile", (client, leader, tile) => {
-                    console.log("getTableTile:", client, leader, tile)
-                    console.log("e.target:", e.target)
                     socket.off("getTableTile")
 
                     let split = tile.split("-")
@@ -207,7 +210,7 @@ const PlayRoom = () => {
                     e.target.innerHTML = number.substring(0, number.length - 1)
                     if (color === "fake") {
                         e.target.style.color = "green"
-                        e.target.innerHTML = "Fake"
+                        e.target.innerHTML = "✿"
                     }
                     else if (color === "red") {
                         e.target.style.color = "red"
@@ -240,9 +243,9 @@ const PlayRoom = () => {
             }
             else if (e.target.id === "right" && myTurn) {
                 if (!tileAllowed) {
-                    var cell = document.getElementsByClassName("cell1")
-                    cell["0"].innerHTML = s.innerHTML
-                    cell["0"].style.color = s.style.color
+                    // cell = document.getElementsByClassName("cell1")
+                    // cell["0"].innerHTML = s.innerHTML
+                    // cell["0"].style.color = s.style.color
 
                     e.target.innerHTML = s.innerHTML
                     e.target.style.color = s.style.color
@@ -266,8 +269,8 @@ const PlayRoom = () => {
             else if (e.target.id === "right" && !myTurn) {
                 return
             }
-            var tempNumber = e.target.innerHTML
-            var tempColor = e.target.style.color
+            tempNumber = e.target.innerHTML
+            tempColor = e.target.style.color
             e.target.innerHTML = s.innerHTML
             e.target.style.color = s.style.color
             s.innerHTML = tempNumber
@@ -279,10 +282,41 @@ const PlayRoom = () => {
 
     useEffect(() => {
         room = queryString.parse(window.location.search).room
-        console.log("room:", room)
 
-        socket = io("/")
-        console.log("socket:", socket)
+        socket = io("/") // http://localhost:4000/
+
+        if (room) {
+            socket.emit("joinRoom", user, room)
+        }
+
+        socket.on("getAllRooms1", (rooms) => {
+            for (const [key, value] of Object.entries(rooms)) {
+                const li = document.createElement("li")
+                li.className = "cls:uk-animation-fade"
+                const div1 = document.createElement("div")
+                div1.className = "uk-grid uk-flex uk-flex-middle"
+                const div2 = document.createElement("div")
+                div2.className = "uk-text-lead"
+                div2.innerHTML = key
+                const div3 = document.createElement("div")
+                div3.className = "uk-width-expand"
+                const div4 = document.createElement("div")
+                div4.className = "uk-text-lead"
+                div4.innerHTML = value.length + "/4"
+                const div5 = document.createElement("div")
+                const button = document.createElement("button")
+                button.className = "uk-button uk-button-danger uk-width-small"
+                button.innerHTML = "Join"
+                li.appendChild(div1)
+                div1.appendChild(div2)
+                div1.appendChild(div3)
+                div1.appendChild(div4)
+                div1.appendChild(div5)
+                div5.appendChild(button)
+                const roomHTML = document.getElementsByClassName("uk-list uk-list-divider")[0]
+                roomHTML.appendChild(li)
+            }
+        })
 
         socket.on("getTile", (mTile, tName, sName, lName, tableMap, okey) => {
             myTile = mTile
@@ -306,7 +340,7 @@ const PlayRoom = () => {
                 entry.innerHTML = number.substring(0, number.length - 1)
                 if (color === "fake") {
                     entry.style.color = "green"
-                    entry.innerHTML = "Fake"
+                    entry.innerHTML = "✿"
                 }
                 else if (color === "red") {
                     entry.style.color = "red"
@@ -324,7 +358,7 @@ const PlayRoom = () => {
         })
 
         socket.on("leader", (otherClients, room, sName, tableMap) => {
-            console.log("I'm leader", otherClients, "...room:", room, "...", "lName:", sName, "...")
+            // console.log("I'm leader", otherClients, "...room:", room, "...", "lName:", sName, "...")
             myTableName = "c_table"
             mySocketName = sName
             myLeaderName = sName
@@ -354,7 +388,7 @@ const PlayRoom = () => {
                 entry.innerHTML = number.substring(0, number.length - 1)
                 if (color === "fake") {
                     entry.style.color = "green"
-                    entry.innerHTML = "Fake"
+                    entry.innerHTML = "✿"
                 }
                 else if (color === "red") {
                     entry.style.color = "red"
@@ -384,45 +418,34 @@ const PlayRoom = () => {
         socket.on("pickTableTile", (client, leader) => {
             var tile = tableTile.shift()
 
-            console.log("pickTableTile", client, leader, tile)
             socket.emit("sendTableTile", client, leader, tile)
         })
 
         socket.on("sendRight", (client, leader, left, right, middle, tile) => {
             var color = tile.split("-")[0]
             var number = tile.split("-")[1]
+            var cell;
             if (mySocketName === client) {
-                var cell = document.getElementsByClassName("cell1")
-                cell["0"].innerHTML = number
-                cell["0"].style.color = color
-
                 var entry = document.getElementById("right")
                 entry.innerHTML = number
                 entry.style.color = color
             }
             else if (mySocketName === left) {
-                var cell = document.getElementsByClassName("cell0")
-                console.log("cell", cell)
-                cell["0"].innerHTML = number
-                cell["0"].style.color = color
+                cell = document.getElementById("tableCell0")
+                cell.innerHTML = number
+                cell.style.color = color
             }
             else if (mySocketName === right) {
-                var cell = document.getElementsByClassName("cell2")
-                console.log("cell", cell)
-                cell["0"].innerHTML = number
-                cell["0"].style.color = color
-
                 myLeftTileStack.push([number, color])
 
-                var entry = document.getElementById("left")
+                entry = document.getElementById("left")
                 entry.innerHTML = number
                 entry.style.color = color
             }
             else if (mySocketName === middle) {
-                var cell = document.getElementsByClassName("cell3")
-                console.log("cell", cell)
-                cell["0"].innerHTML = number
-                cell["0"].style.color = color
+                cell = document.getElementById("tableCell3")
+                cell.innerHTML = number
+                cell.style.color = color
             }
         })
 
@@ -432,461 +455,550 @@ const PlayRoom = () => {
         })
 
         socket.on("leftChanged", (client, number, color) => {
+            var cell;
             if (client === myLeftName) {
-                var cell = document.getElementsByClassName("cell3")
-                cell["0"].innerHTML = number
-                cell["0"].style.color = color
+                cell = document.getElementById("tableCell3")
+                cell.innerHTML = number
+                cell.style.color = color
             }
             else if (client === myRightName) {
-                var cell = document.getElementsByClassName("cell1")
-                cell["0"].innerHTML = number
-                cell["0"].style.color = color
+                cell = document.getElementById("right")
+                cell.innerHTML = number
+                cell.style.color = color
             }
             else if (client === myOppositeName) {
-                var cell = document.getElementsByClassName("cell0")
-                cell["0"].innerHTML = number
-                cell["0"].style.color = color
+                cell = document.getElementById("tableCell0")
+                cell.innerHTML = number
+                cell.style.color = color
             }
         })
-
-        console.log("1) user: " + user + ", roomID: " + room)
     }, [])
 
     return (
-        <body class="uk-background-muted">
-            <div class="uk-container">
-                <header class="uk-section-xsmall uk-section-default samd-border" style={{ borderRadius: "0 0 10px 10px;" }}>
-                    <div class="uk-container">
-                        <h1 class="uk-text-center">samd</h1>
-                    </div>
-                </header>
-                <nav class="uk-background-transparent uk-padding-small">
-                    <div class="uk-container uk-flex uk-flex-center uk-flex-middle">
-                        <ul class="uk-subnav uk-subnav-divider" uk-switcher="connect: #pages" uk-margin>
-                            <li><a>Home</a></li>
-                            <li><a>About</a></li>
-                            <li><a>Blog</a></li>
-                            <li><a>Okey</a></li>
-                            <li><a>Drawing Board</a></li>
-                        </ul>
-                    </div>
-                </nav>
-                <main class="uk-background-default samd-border" uk-height-viewport="expand: true;" style={{ borderRadius: "10px;" }}>
-                    <div class="uk-padding">
-                        <ul class="uk-switcher" id="pages">
-                            <li class="uk-animation-fade">
-                                <h2>Hello, there.</h2>
-                            </li>
-                            <li class="uk-animation-fade">
-                                <h2>About</h2>
-                                <p>Praesent turpis est, vestibulum at blandit at, sodales id lorem. Morbi hendrerit diam et vulputate vehicula. Aenean sollicitudin at enim nec dignissim. Ut mi tellus, consectetur at aliquet gravida, egestas at neque. Curabitur bibendum dui metus, quis egestas turpis tincidunt vitae. Donec vulputate dapibus justo, non facilisis felis bibendum non. Mauris non velit leo. Fusce maximus, tortor at aliquam rutrum, ante metus blandit enim, sed congue arcu tellus suscipit nunc. Donec sed rhoncus ipsum. Donec luctus ac ex in cursus. Curabitur malesuada id metus sit amet interdum. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis vitae sem in lectus suscipit blandit.</p>
-                                <p>Duis pellentesque dolor vitae nisi pulvinar consequat. Pellentesque at velit ac quam fermentum ultricies et eu elit. Suspendisse faucibus auctor metus a sollicitudin. Vestibulum maximus interdum ipsum sed mattis. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc suscipit id augue eu auctor. Sed eget libero rhoncus, hendrerit risus non, semper quam. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aenean eu turpis et augue interdum gravida quis mattis leo. Proin ut rutrum diam. Proin fringilla, nulla vel consectetur sodales, augue nisl fermentum massa, ut dictum orci justo sit amet massa. Ut vel leo tincidunt, consequat eros non, mollis augue. Phasellus non libero consequat, consectetur elit sit amet, ultricies nisl. Nulla facilisi. Vivamus malesuada est at augue congue, eget molestie arcu pulvinar.</p>
-                            </li>
-                            <li class="uk-animation-fade">
-                                <h2>Blog</h2>
-                                <article>
-                                    <h3 class="uk-margin-small"><a class="uk-link-reset" href="">Aliquam sodales dolor id vehicula aliquet</a></h3>
-                                    <p class="uk-text-meta uk-margin-remove">12 April 2012</p>
+        <div className="uk-container">
+            <header className="uk-section-xsmall uk-section-default samd-border samd-rounded-bottom">
+                <div className="uk-container">
+                    <h1 className="uk-text-center">samd</h1>
+                </div>
+            </header>
+            <nav className="uk-background-transparent uk-padding-small">
+                <div className="uk-container uk-flex uk-flex-center uk-flex-middle">
+                    <ul className="uk-subnav uk-subnav-divider" uk-switcher="connect: #pages" active={queryString.parse(window.location.search).room ? "4" : "0"} uk-margin="true">
+                        <li><a href="/#">Home</a></li>
+                        <li><a href="/#">About</a></li>
+                        <li><a href="/#">Blog</a></li>
+                        <li><a href="/#">Okey</a></li>
+                        <li><a href="/#">Okey (ingame, debug)</a></li>
+                        <li><a href="/#">Drawing Board</a></li>
+                    </ul>
+                </div>
+            </nav>
+            <main className="uk-background-default samd-border samd-rounded" uk-height-viewport="expand: true;">
+                <div className="uk-padding">
+                    <ul className="uk-switcher" id="pages">
+                        <li className="uk-animation-fade">
+                            <h2>Hello, there.</h2>
+                        </li>
+                        <li className="uk-animation-fade">
+                            <h2>About</h2>
+                            <p>Praesent turpis est, vestibulum at blandit at, sodales id lorem. Morbi hendrerit diam et vulputate vehicula. Aenean sollicitudin at enim nec dignissim. Ut mi tellus, consectetur at aliquet gravida, egestas at neque. Curabitur bibendum dui metus, quis egestas turpis tincidunt vitae. Donec vulputate dapibus justo, non facilisis felis bibendum non. Mauris non velit leo. Fusce maximus, tortor at aliquam rutrum, ante metus blandit enim, sed congue arcu tellus suscipit nunc. Donec sed rhoncus ipsum. Donec luctus ac ex in cursus. Curabitur malesuada id metus sit amet interdum. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis vitae sem in lectus suscipit blandit.</p>
+                            <p>Duis pellentesque dolor vitae nisi pulvinar consequat. Pellentesque at velit ac quam fermentum ultricies et eu elit. Suspendisse faucibus auctor metus a sollicitudin. Vestibulum maximus interdum ipsum sed mattis. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc suscipit id augue eu auctor. Sed eget libero rhoncus, hendrerit risus non, semper quam. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aenean eu turpis et augue interdum gravida quis mattis leo. Proin ut rutrum diam. Proin fringilla, nulla vel consectetur sodales, augue nisl fermentum massa, ut dictum orci justo sit amet massa. Ut vel leo tincidunt, consequat eros non, mollis augue. Phasellus non libero consequat, consectetur elit sit amet, ultricies nisl. Nulla facilisi. Vivamus malesuada est at augue congue, eget molestie arcu pulvinar.</p>
+                            <h2>Contact Me</h2>
+                            <p>Praesent turpis est, vestibulum at blandit at, sodales id lorem. Morbi hendrerit diam et vulputate vehicula. Aenean sollicitudin at enim nec dignissim. Ut mi tellus, consectetur at aliquet gravida, egestas at neque. Curabitur bibendum dui metus, quis egestas turpis tincidunt vitae. Donec vulputate dapibus justo, non facilisis felis bibendum non. Mauris non velit leo. Fusce maximus, tortor at aliquam rutrum, ante metus blandit enim, sed congue arcu tellus suscipit nunc. Donec sed rhoncus ipsum. Donec luctus ac ex in cursus. Curabitur malesuada id metus sit amet interdum. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis vitae sem in lectus suscipit blandit.</p>
+                        </li>
+                        <li className="uk-animation-fade">
+                            <h2>Blog</h2>
+                            <article>
+                                <h3 className="uk-margin-small"><a className="uk-link-reset" href="/#">Aliquam sodales dolor id vehicula aliquet</a></h3>
+                                <p className="uk-text-meta uk-margin-remove">12 April 2012</p>
 
-                                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
 
-                                    <div class="uk-grid-small uk-child-width-auto" uk-grid>
-                                        <div>
-                                            <a class="uk-button uk-button-text" href="#">Read more</a>
+                                <div className="uk-grid-small uk-child-width-auto" uk-grid="true">
+                                    <div>
+                                        <a className="uk-button uk-button-text" href="/#">Read more</a>
+                                    </div>
+                                    <div>
+                                        <a className="uk-button uk-button-text" href="/#">5 Comments</a>
+                                    </div>
+                                </div>
+
+                            </article>
+                            <hr className="uk-divider-icon" />
+                            <article>
+                                <h3 className="uk-margin-small"><a className="uk-link-reset" href="/#">Aliquam sodales dolor id vehicula aliquet</a></h3>
+                                <p className="uk-text-meta uk-margin-remove">12 April 2012</p>
+
+                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+
+                                <div className="uk-grid-small uk-child-width-auto" uk-grid="true">
+                                    <div>
+                                        <a className="uk-button uk-button-text" href="/#">Read more</a>
+                                    </div>
+                                    <div>
+                                        <a className="uk-button uk-button-text" href="/#">5 Comments</a>
+                                    </div>
+                                </div>
+
+                            </article>
+                            <hr className="uk-divider-icon" />
+                            <article>
+                                <h3 className="uk-margin-small"><a className="uk-link-reset" href="/#">Aliquam sodales dolor id vehicula aliquet</a></h3>
+                                <p className="uk-text-meta uk-margin-remove">12 April 2012</p>
+
+                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+
+                                <div className="uk-grid-small uk-child-width-auto" uk-grid="true">
+                                    <div>
+                                        <a className="uk-button uk-button-text" href="/#">Read more</a>
+                                    </div>
+                                    <div>
+                                        <a className="uk-button uk-button-text" href="/#">5 Comments</a>
+                                    </div>
+                                </div>
+
+                            </article>
+                        </li>
+                        <li className="uk-animation-fade">
+                            <h2>Okey</h2>
+                            <ul className="uk-list uk-list-divider">
+                                <li>
+                                    <div className="uk-grid uk-flex uk-flex-middle">
+                                        <div className="uk-text-lead">
+                                            Your Room
+                                            </div>
+                                        <div className="uk-width-expand"> </div>
+                                        <div className="uk-text-lead">
+                                            0/4
                                         </div>
                                         <div>
-                                            <a class="uk-button uk-button-text" href="#">5 Comments</a>
+                                            <button
+                                                className="uk-button uk-button-primary uk-width-small"
+                                                onClick={() => {
+                                                    const randomURL = uuidv4().split("-")[0]
+                                                    const addURL = "?room=" + randomURL
+                                                    window.location.href += addURL
+                                                    socket.emit("joinRoom", user, randomURL)
+                                                }}
+                                            >
+                                                Create
+                                            </button>
                                         </div>
                                     </div>
-
-                                </article>
-                                <hr class="uk-divider-icon" />
-                                <article>
-                                    <h3 class="uk-margin-small"><a class="uk-link-reset" href="">Aliquam sodales dolor id vehicula aliquet</a></h3>
-                                    <p class="uk-text-meta uk-margin-remove">12 April 2012</p>
-
-                                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-
-                                    <div class="uk-grid-small uk-child-width-auto" uk-grid>
+                                </li>
+                                <li uk-scrollspy="cls:uk-animation-fade">
+                                    <div className="uk-grid uk-flex uk-flex-middle">
+                                        <div className="uk-text-lead">
+                                            Room 1
+                                            </div>
+                                        <div className="uk-width-expand"> </div>
+                                        <div className="uk-text-lead">
+                                            1/4
+                                            </div>
                                         <div>
-                                            <a class="uk-button uk-button-text" href="#">Read more</a>
+                                            <button className="uk-button uk-button-danger uk-width-small">Join</button>
                                         </div>
+                                    </div>
+                                </li>
+                                <li uk-scrollspy="cls:uk-animation-fade">
+                                    <div className="uk-grid uk-flex uk-flex-middle">
+                                        <div className="uk-text-lead">
+                                            Room 1
+                                            </div>
+                                        <div className="uk-width-expand"> </div>
+                                        <div className="uk-text-lead">
+                                            1/4
+                                            </div>
                                         <div>
-                                            <a class="uk-button uk-button-text" href="#">5 Comments</a>
+                                            <button className="uk-button uk-button-danger uk-width-small">Join</button>
                                         </div>
                                     </div>
-
-                                </article>
-                                <hr class="uk-divider-icon" />
-                                <article>
-                                    <h3 class="uk-margin-small"><a class="uk-link-reset" href="">Aliquam sodales dolor id vehicula aliquet</a></h3>
-                                    <p class="uk-text-meta uk-margin-remove">12 April 2012</p>
-
-                                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-
-                                    <div class="uk-grid-small uk-child-width-auto" uk-grid>
+                                </li>
+                                <li uk-scrollspy="cls:uk-animation-fade">
+                                    <div className="uk-grid uk-flex uk-flex-middle">
+                                        <div className="uk-text-lead">
+                                            Room 1
+                                            </div>
+                                        <div className="uk-width-expand"> </div>
+                                        <div className="uk-text-lead">
+                                            1/4
+                                            </div>
                                         <div>
-                                            <a class="uk-button uk-button-text" href="#">Read more</a>
+                                            <button className="uk-button uk-button-danger uk-width-small">Join</button>
                                         </div>
+                                    </div>
+                                </li>
+                                <li uk-scrollspy="cls:uk-animation-fade">
+                                    <div className="uk-grid uk-flex uk-flex-middle">
+                                        <div className="uk-text-lead">
+                                            Room 1
+                                            </div>
+                                        <div className="uk-width-expand"> </div>
+                                        <div className="uk-text-lead">
+                                            1/4
+                                            </div>
                                         <div>
-                                            <a class="uk-button uk-button-text" href="#">5 Comments</a>
+                                            <button className="uk-button uk-button-danger uk-width-small">Join</button>
                                         </div>
                                     </div>
-
-                                </article>
-                            </li>
-                            <li class="uk-animation-fade">
-                                <h2>Okey</h2>
-                                <ul class="uk-list uk-list-divider">
-                                    <li>
-                                        <div class="uk-grid uk-flex uk-flex-middle">
-                                            <div class="uk-text-lead">
-                                                Your Room
-                                    </div>
-                                            <div class="uk-width-expand">
+                                </li>
+                                <li uk-scrollspy="cls:uk-animation-fade">
+                                    <div className="uk-grid uk-flex uk-flex-middle">
+                                        <div className="uk-text-lead">
+                                            Room 1
                                             </div>
-                                            <div class="uk-text-lead">
-                                                0/4
-                                    </div>
-                                            <div>
-                                                <button class="uk-button uk-button-primary uk-width-small">Create</button>
+                                        <div className="uk-width-expand"> </div>
+                                        <div className="uk-text-lead">
+                                            1/4
                                             </div>
+                                        <div>
+                                            <button className="uk-button uk-button-danger uk-width-small">Join</button>
                                         </div>
-                                    </li>
-                                    <li uk-scrollspy="cls:uk-animation-fade">
-                                        <div class="uk-grid uk-flex uk-flex-middle">
-                                            <div class="uk-text-lead">
-                                                Room 1
                                     </div>
-                                            <div class="uk-width-expand">
-                                            </div>
-                                            <div class="uk-text-lead">
-                                                1/4
-                                    </div>
-                                            <div>
-                                                <button class="uk-button uk-button-danger uk-width-small">Join</button>
-                                            </div>
-                                        </div>
-                                    </li>
-                                    <li uk-scrollspy="cls:uk-animation-fade">
-                                        <div class="uk-grid uk-flex uk-flex-middle">
-                                            <div class="uk-text-lead">
-                                                Room 1
-                                    </div>
-                                            <div class="uk-width-expand">
-                                            </div>
-                                            <div class="uk-text-lead">
-                                                1/4
-                                    </div>
-                                            <div>
-                                                <button class="uk-button uk-button-danger uk-width-small">Join</button>
-                                            </div>
-                                        </div>
-                                    </li>
-                                    <li uk-scrollspy="cls:uk-animation-fade">
-                                        <div class="uk-grid uk-flex uk-flex-middle">
-                                            <div class="uk-text-lead">
-                                                Room 1
-                                    </div>
-                                            <div class="uk-width-expand">
-                                            </div>
-                                            <div class="uk-text-lead">
-                                                1/4
-                                    </div>
-                                            <div>
-                                                <button class="uk-button uk-button-danger uk-width-small">Join</button>
-                                            </div>
-                                        </div>
-                                    </li>
-                                    <li uk-scrollspy="cls:uk-animation-fade">
-                                        <div class="uk-grid uk-flex uk-flex-middle">
-                                            <div class="uk-text-lead">
-                                                Room 1
-                                    </div>
-                                            <div class="uk-width-expand">
-                                            </div>
-                                            <div class="uk-text-lead">
-                                                1/4
-                                    </div>
-                                            <div>
-                                                <button class="uk-button uk-button-danger uk-width-small">Join</button>
-                                            </div>
-                                        </div>
-                                    </li>                <li uk-scrollspy="cls:uk-animation-fade">
-                                        <div class="uk-grid uk-flex uk-flex-middle">
-                                            <div class="uk-text-lead">
-                                                Room 1
-                                    </div>
-                                            <div class="uk-width-expand">
-                                            </div>
-                                            <div class="uk-text-lead">
-                                                1/4
-                                    </div>
-                                            <div>
-                                                <button class="uk-button uk-button-danger uk-width-small">Join</button>
-                                            </div>
-                                        </div>
-                                    </li>
-                                </ul>
+                                </li>
+                            </ul>
 
-                                <div>Total Players: <span class="uk-label uk-label-warning">12431</span></div>
-                            </li>
-                            <li class="uk-animation-fade">
-                                <h2>Drawing Board</h2>
-                            </li>
-                        </ul>
-                    </div>
-                </main>
-                <footer class="uk-background-transparent uk-padding-small">
-                    <div class="uk-container">
-                        <p class="uk-text-meta uk-text-center">Copyright &copy; 2021 samd</p>
-                    </div>
-                </footer>
-            </div>
+                            <div>Total Players: <span className="uk-label uk-label-warning">12431</span></div>
+                        </li>
+                        <li>
+                            <button className="uk-button uk-button-primary" id="readyButton" onClick={() => {
+                                socket.emit("imready", user, room)
+                            }}>
+                                Ready
+                            </button>
 
-            <input type="submit" value="I'm ready" onClick={() => socket.emit("imready", { user, room })} />
+                            <div className="uk-flex uk-flex-middle uk-flex-center">
+                                <div className="okeyTable">
 
-            <div className="okeyTable">
+                                    <div className="cell0" style={{ color: "black" }}></div>
+                                    <div className="cell1" style={{ color: "black" }}></div>
+                                    <div className="cell2" style={{ color: "black" }}></div>
+                                    <div className="cell3" style={{ color: "black" }}></div>
 
-                <div className="cell0" style={{ color: "black" }}></div>
-                <div className="cell1" style={{ color: "black" }}></div>
-                <div className="cell2" style={{ color: "black" }}></div>
-                <div className="cell3" style={{ color: "black" }}></div>
+                                    <div className="okeyTile" style={{ color: "red" }}></div>
 
-                <div className="okeyTile" style={{ color: "red" }}></div>
+                                    <div className="rectangleA"></div>
+                                    <div className="rectangleB"></div>
+                                    <div className="rectangleC"></div>
 
-                <div className="rectangleA"></div>
-                <div className="rectangleB"></div>
-                <div className="rectangleC"></div>
+                                    <table className="uk-table uk-table-small uk-table-middle .uk-width-20 myTable" onDrop={drop} onDragOver={(e) => e.stopPropagation()}>
+                                        <tbody key={"d"}>
 
-                <table className="myTable" onDrop={drop} onDragOver={(e) => e.stopPropagation()}>
-                    <thead key="thead">
-                        <tr>
-                            <th>1</th>
-                            <th>2</th>
-                            <th>3</th>
-                            <th>4</th>
-                            <th>5</th>
-                            <th>6</th>
-                            <th>7</th>
-                            <th>8</th>
-                            <th>9</th>
-                            <th>10</th>
-                            <th>11</th>
-                            <th>12</th>
-                            <th>13</th>
-                            <th>14</th>
-                        </tr>
-                    </thead>
-                    <tbody key={"d"}>
-                        <tr className="gamePlay">
-                            <td
-                                id="left"
-                                draggable={true}
-                                onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
-                                onDragOver={(e) => e.preventDefault()}
-                                colSpan="4"
-                                style={{ textAlign: "center" }}
-                            >
-                                LEFT
-                            </td>
-                            <td
-                                id="middle"
-                                draggable={true}
-                                onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
-                                onDragOver={(e) => e.preventDefault()}
-                                colSpan="6"
-                                style={{ textAlign: "center" }}
-                            >
-                                MIDDLE
-                            </td>
-                            <td
-                                id="right"
-                                draggable={true}
-                                onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
-                                onDragOver={(e) => e.preventDefault()}
-                                colSpan="4"
-                                style={{ textAlign: "center" }}
-                            >
-                                RIGHT
-                            </td>
-                        </tr>
-                        <tr>
-                            <td
-                                id="1"
-                                draggable={true}
-                                onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
-                                onDragOver={(e) => e.preventDefault()}
-                            />
-                            <td
-                                id="2"
-                                draggable={true}
-                                onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
-                                onDragOver={(e) => e.preventDefault()}
-                            />
-                            <td
-                                id="3"
-                                draggable={true}
-                                onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
-                                onDragOver={(e) => e.preventDefault()}
-                            />
-                            <td
-                                id="4"
-                                draggable={true}
-                                onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
-                                onDragOver={(e) => e.preventDefault()}
-                            />
-                            <td
-                                id="5"
-                                draggable={true}
-                                onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
-                                onDragOver={(e) => e.preventDefault()}
-                            />
-                            <td
-                                id="6"
-                                draggable={true}
-                                onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
-                                onDragOver={(e) => e.preventDefault()}
-                            />
-                            <td
-                                id="7"
-                                draggable={true}
-                                onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
-                                onDragOver={(e) => e.preventDefault()}
-                            />
-                            <td
-                                id="8"
-                                draggable={true}
-                                onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
-                                onDragOver={(e) => e.preventDefault()}
-                            />
-                            <td
-                                id="9"
-                                draggable={true}
-                                onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
-                                onDragOver={(e) => e.preventDefault()}
-                            />
-                            <td
-                                id="10"
-                                draggable={true}
-                                onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
-                                onDragOver={(e) => e.preventDefault()}
-                            />
-                            <td
-                                id="11"
-                                draggable={true}
-                                onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
-                                onDragOver={(e) => e.preventDefault()}
-                            />
-                            <td
-                                id="12"
-                                draggable={true}
-                                onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
-                                onDragOver={(e) => e.preventDefault()}
-                            />
-                            <td
-                                id="13"
-                                draggable={true}
-                                onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
-                                onDragOver={(e) => e.preventDefault()}
-                            />
-                            <td
-                                id="14"
-                                draggable={true}
-                                onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
-                                onDragOver={(e) => e.preventDefault()}
-                            />
-                        </tr>
-                        <tr>
-                            <td
-                                id="15"
-                                draggable={true}
-                                onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
-                                onDragOver={(e) => e.preventDefault()}
-                            />
-                            <td
-                                id="16"
-                                draggable={true}
-                                onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
-                                onDragOver={(e) => e.preventDefault()}
-                            />
-                            <td
-                                id="17"
-                                draggable={true}
-                                onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
-                                onDragOver={(e) => e.preventDefault()}
-                            />
-                            <td
-                                id="18"
-                                draggable={true}
-                                onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
-                                onDragOver={(e) => e.preventDefault()}
-                            />
-                            <td
-                                id="19"
-                                draggable={true}
-                                onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
-                                onDragOver={(e) => e.preventDefault()}
-                            />
-                            <td
-                                id="20"
-                                draggable={true}
-                                onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
-                                onDragOver={(e) => e.preventDefault()}
-                            />
-                            <td
-                                id="21"
-                                draggable={true}
-                                onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
-                                onDragOver={(e) => e.preventDefault()}
-                            />
-                            <td
-                                id="22"
-                                draggable={true}
-                                onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
-                                onDragOver={(e) => e.preventDefault()}
-                            />
-                            <td
-                                id="23"
-                                draggable={true}
-                                onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
-                                onDragOver={(e) => e.preventDefault()}
-                            />
-                            <td
-                                id="24"
-                                draggable={true}
-                                onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
-                                onDragOver={(e) => e.preventDefault()}
-                            />
-                            <td
-                                id="25"
-                                draggable={true}
-                                onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
-                                onDragOver={(e) => e.preventDefault()}
-                            />
-                            <td
-                                id="26"
-                                draggable={true}
-                                onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
-                                onDragOver={(e) => e.preventDefault()}
-                            />
-                            <td
-                                id="27"
-                                draggable={true}
-                                onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
-                                onDragOver={(e) => e.preventDefault()}
-                            />
-                            <td
-                                id="28"
-                                draggable={true}
-                                onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
-                                onDragOver={(e) => e.preventDefault()}
-                            />
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </body>
+                                            <tr className="gamePlay">
+                                                <td></td>
+                                                <td
+                                                    id="tableCell3"
+                                                    colSpan="2"
+                                                    rowSpan="2"
+                                                    style={{ textAlign: "center" }}>
+                                                </td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td
+                                                    id="tableCell0"
+                                                    colSpan="2"
+                                                    rowSpan="2"
+                                                    style={{ textAlign: "center" }}>
+                                                </td>
+                                                <td></td>
+                                            </tr>
+
+                                            <tr className="gamePlay">
+                                                <td> </td>
+                                                <td> </td>
+                                                <td> </td>
+                                                <td> </td>
+                                                <td> </td>
+                                                <td> </td>
+                                                <td> </td>
+                                                <td> </td>
+                                                <td> </td>
+                                                <td> </td>
+                                            </tr>
+
+                                            <tr className="gamePlay">
+                                                <td> </td>
+                                                <td> </td>
+                                                <td> </td>
+                                                <td> </td>
+                                                <td> </td>
+                                                <td> </td>
+                                                <td
+                                                    id="middle"
+                                                    draggable={true}
+                                                    onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                                                    onDragOver={(e) => e.preventDefault()}
+                                                    colSpan="2"
+                                                    rowSpan="2"
+                                                    style={{ textAlign: "center" }}>
+                                                </td>
+                                                <td> </td>
+                                                <td> </td>
+                                                <td> </td>
+                                                <td> </td>
+                                                <td> </td>
+                                                <td> </td>
+                                            </tr>
+
+                                            <tr className="gamePlay">
+                                                <td> </td>
+                                                <td> </td>
+                                                <td> </td>
+                                                <td> </td>
+                                                <td> </td>
+                                                <td> </td>
+                                                <td> </td>
+                                                <td> </td>
+                                                <td> </td>
+                                                <td> </td>
+                                                <td> </td>
+                                                <td> </td>
+                                            </tr>
+
+                                            <tr className="gamePlay">
+                                                <td></td>
+                                                <td
+                                                    id="left"
+                                                    draggable={true}
+                                                    onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                                                    onDragOver={(e) => e.preventDefault()}
+                                                    colSpan="2"
+                                                    rowSpan="2"
+                                                    style={{ textAlign: "center" }}>
+                                                </td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td
+                                                    id="right"
+                                                    draggable={true}
+                                                    onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                                                    onDragOver={(e) => e.preventDefault()}
+                                                    colSpan="2"
+                                                    rowSpan="2"
+                                                    style={{ textAlign: "center" }}>
+                                                </td>
+                                                <td></td>
+                                            </tr>
+
+                                            <tr className="gamePlay">
+                                                <td> </td>
+                                                <td> </td>
+                                                <td> </td>
+                                                <td> </td>
+                                                <td> </td>
+                                                <td> </td>
+                                                <td> </td>
+                                                <td> </td>
+                                                <td> </td>
+                                                <td> </td>
+
+                                            </tr>
+
+                                            <tr>
+                                                <td
+                                                    id="1"
+                                                    draggable={true}
+                                                    onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                                                    onDragOver={(e) => e.preventDefault()}
+                                                />
+                                                <td
+                                                    id="2"
+                                                    draggable={true}
+                                                    onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                                                    onDragOver={(e) => e.preventDefault()}
+                                                />
+                                                <td
+                                                    id="3"
+                                                    draggable={true}
+                                                    onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                                                    onDragOver={(e) => e.preventDefault()}
+                                                />
+                                                <td
+                                                    id="4"
+                                                    draggable={true}
+                                                    onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                                                    onDragOver={(e) => e.preventDefault()}
+                                                />
+                                                <td
+                                                    id="5"
+                                                    draggable={true}
+                                                    onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                                                    onDragOver={(e) => e.preventDefault()}
+                                                />
+                                                <td
+                                                    id="6"
+                                                    draggable={true}
+                                                    onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                                                    onDragOver={(e) => e.preventDefault()}
+                                                />
+                                                <td
+                                                    id="7"
+                                                    draggable={true}
+                                                    onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                                                    onDragOver={(e) => e.preventDefault()}
+                                                />
+                                                <td
+                                                    id="8"
+                                                    draggable={true}
+                                                    onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                                                    onDragOver={(e) => e.preventDefault()}
+                                                />
+                                                <td
+                                                    id="9"
+                                                    draggable={true}
+                                                    onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                                                    onDragOver={(e) => e.preventDefault()}
+                                                />
+                                                <td
+                                                    id="10"
+                                                    draggable={true}
+                                                    onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                                                    onDragOver={(e) => e.preventDefault()}
+                                                />
+                                                <td
+                                                    id="11"
+                                                    draggable={true}
+                                                    onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                                                    onDragOver={(e) => e.preventDefault()}
+                                                />
+                                                <td
+                                                    id="12"
+                                                    draggable={true}
+                                                    onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                                                    onDragOver={(e) => e.preventDefault()}
+                                                />
+                                                <td
+                                                    id="13"
+                                                    draggable={true}
+                                                    onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                                                    onDragOver={(e) => e.preventDefault()}
+                                                />
+                                                <td
+                                                    id="14"
+                                                    draggable={true}
+                                                    onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                                                    onDragOver={(e) => e.preventDefault()}
+                                                />
+                                            </tr>
+
+                                            <tr>
+                                                <td
+                                                    id="15"
+                                                    draggable={true}
+                                                    onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                                                    onDragOver={(e) => e.preventDefault()}
+                                                />
+                                                <td
+                                                    id="16"
+                                                    draggable={true}
+                                                    onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                                                    onDragOver={(e) => e.preventDefault()}
+                                                />
+                                                <td
+                                                    id="17"
+                                                    draggable={true}
+                                                    onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                                                    onDragOver={(e) => e.preventDefault()}
+                                                />
+                                                <td
+                                                    id="18"
+                                                    draggable={true}
+                                                    onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                                                    onDragOver={(e) => e.preventDefault()}
+                                                />
+                                                <td
+                                                    id="19"
+                                                    draggable={true}
+                                                    onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                                                    onDragOver={(e) => e.preventDefault()}
+                                                />
+                                                <td
+                                                    id="20"
+                                                    draggable={true}
+                                                    onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                                                    onDragOver={(e) => e.preventDefault()}
+                                                />
+                                                <td
+                                                    id="21"
+                                                    draggable={true}
+                                                    onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                                                    onDragOver={(e) => e.preventDefault()}
+                                                />
+                                                <td
+                                                    id="22"
+                                                    draggable={true}
+                                                    onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                                                    onDragOver={(e) => e.preventDefault()}
+                                                />
+                                                <td
+                                                    id="23"
+                                                    draggable={true}
+                                                    onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                                                    onDragOver={(e) => e.preventDefault()}
+                                                />
+                                                <td
+                                                    id="24"
+                                                    draggable={true}
+                                                    onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                                                    onDragOver={(e) => e.preventDefault()}
+                                                />
+                                                <td
+                                                    id="25"
+                                                    draggable={true}
+                                                    onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                                                    onDragOver={(e) => e.preventDefault()}
+                                                />
+                                                <td
+                                                    id="26"
+                                                    draggable={true}
+                                                    onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                                                    onDragOver={(e) => e.preventDefault()}
+                                                />
+                                                <td
+                                                    id="27"
+                                                    draggable={true}
+                                                    onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                                                    onDragOver={(e) => e.preventDefault()}
+                                                />
+                                                <td
+                                                    id="28"
+                                                    draggable={true}
+                                                    onDragStart={(e) => e.dataTransfer.setData("id", e.target.id)}
+                                                    onDragOver={(e) => e.preventDefault()}
+                                                />
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                        </li>
+                        <li className="uk-animation-fade">
+                            <h2>Drawing Board</h2>
+                        </li>
+                    </ul>
+                </div>
+            </main>
+            <footer className="uk-background-transparent uk-padding-small">
+                <div className="uk-container">
+                    <p className="uk-text-meta uk-text-center">Copyright &copy; 2021 samd</p>
+                </div>
+            </footer>
+        </div>
+
+
     )
 }
 
