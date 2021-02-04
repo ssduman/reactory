@@ -4,6 +4,9 @@ import _ from 'underscore'
 import '../App.css'
 import queryString from 'query-string'
 import { io } from "socket.io-client"
+import "../../node_modules/uikit/dist/js/uikit.min.js"
+import "../../node_modules/uikit/dist/js/uikit-icons.min.js"
+import "../../node_modules/uikit/dist/css/uikit.min.css"
 
 const allTiles = [
     { "red-1a": 1 },
@@ -450,7 +453,197 @@ const PlayRoom = () => {
     }, [])
 
     return (
-        <div>
+        <body class="uk-background-muted">
+            <div class="uk-container">
+                <header class="uk-section-xsmall uk-section-default samd-border" style={{ borderRadius: "0 0 10px 10px;" }}>
+                    <div class="uk-container">
+                        <h1 class="uk-text-center">samd</h1>
+                    </div>
+                </header>
+                <nav class="uk-background-transparent uk-padding-small">
+                    <div class="uk-container uk-flex uk-flex-center uk-flex-middle">
+                        <ul class="uk-subnav uk-subnav-divider" uk-switcher="connect: #pages" uk-margin>
+                            <li><a>Home</a></li>
+                            <li><a>About</a></li>
+                            <li><a>Blog</a></li>
+                            <li><a>Okey</a></li>
+                            <li><a>Drawing Board</a></li>
+                        </ul>
+                    </div>
+                </nav>
+                <main class="uk-background-default samd-border" uk-height-viewport="expand: true;" style={{ borderRadius: "10px;" }}>
+                    <div class="uk-padding">
+                        <ul class="uk-switcher" id="pages">
+                            <li class="uk-animation-fade">
+                                <h2>Hello, there.</h2>
+                            </li>
+                            <li class="uk-animation-fade">
+                                <h2>About</h2>
+                                <p>Praesent turpis est, vestibulum at blandit at, sodales id lorem. Morbi hendrerit diam et vulputate vehicula. Aenean sollicitudin at enim nec dignissim. Ut mi tellus, consectetur at aliquet gravida, egestas at neque. Curabitur bibendum dui metus, quis egestas turpis tincidunt vitae. Donec vulputate dapibus justo, non facilisis felis bibendum non. Mauris non velit leo. Fusce maximus, tortor at aliquam rutrum, ante metus blandit enim, sed congue arcu tellus suscipit nunc. Donec sed rhoncus ipsum. Donec luctus ac ex in cursus. Curabitur malesuada id metus sit amet interdum. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis vitae sem in lectus suscipit blandit.</p>
+                                <p>Duis pellentesque dolor vitae nisi pulvinar consequat. Pellentesque at velit ac quam fermentum ultricies et eu elit. Suspendisse faucibus auctor metus a sollicitudin. Vestibulum maximus interdum ipsum sed mattis. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc suscipit id augue eu auctor. Sed eget libero rhoncus, hendrerit risus non, semper quam. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aenean eu turpis et augue interdum gravida quis mattis leo. Proin ut rutrum diam. Proin fringilla, nulla vel consectetur sodales, augue nisl fermentum massa, ut dictum orci justo sit amet massa. Ut vel leo tincidunt, consequat eros non, mollis augue. Phasellus non libero consequat, consectetur elit sit amet, ultricies nisl. Nulla facilisi. Vivamus malesuada est at augue congue, eget molestie arcu pulvinar.</p>
+                            </li>
+                            <li class="uk-animation-fade">
+                                <h2>Blog</h2>
+                                <article>
+                                    <h3 class="uk-margin-small"><a class="uk-link-reset" href="">Aliquam sodales dolor id vehicula aliquet</a></h3>
+                                    <p class="uk-text-meta uk-margin-remove">12 April 2012</p>
+
+                                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+
+                                    <div class="uk-grid-small uk-child-width-auto" uk-grid>
+                                        <div>
+                                            <a class="uk-button uk-button-text" href="#">Read more</a>
+                                        </div>
+                                        <div>
+                                            <a class="uk-button uk-button-text" href="#">5 Comments</a>
+                                        </div>
+                                    </div>
+
+                                </article>
+                                <hr class="uk-divider-icon" />
+                                <article>
+                                    <h3 class="uk-margin-small"><a class="uk-link-reset" href="">Aliquam sodales dolor id vehicula aliquet</a></h3>
+                                    <p class="uk-text-meta uk-margin-remove">12 April 2012</p>
+
+                                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+
+                                    <div class="uk-grid-small uk-child-width-auto" uk-grid>
+                                        <div>
+                                            <a class="uk-button uk-button-text" href="#">Read more</a>
+                                        </div>
+                                        <div>
+                                            <a class="uk-button uk-button-text" href="#">5 Comments</a>
+                                        </div>
+                                    </div>
+
+                                </article>
+                                <hr class="uk-divider-icon" />
+                                <article>
+                                    <h3 class="uk-margin-small"><a class="uk-link-reset" href="">Aliquam sodales dolor id vehicula aliquet</a></h3>
+                                    <p class="uk-text-meta uk-margin-remove">12 April 2012</p>
+
+                                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+
+                                    <div class="uk-grid-small uk-child-width-auto" uk-grid>
+                                        <div>
+                                            <a class="uk-button uk-button-text" href="#">Read more</a>
+                                        </div>
+                                        <div>
+                                            <a class="uk-button uk-button-text" href="#">5 Comments</a>
+                                        </div>
+                                    </div>
+
+                                </article>
+                            </li>
+                            <li class="uk-animation-fade">
+                                <h2>Okey</h2>
+                                <ul class="uk-list uk-list-divider">
+                                    <li>
+                                        <div class="uk-grid uk-flex uk-flex-middle">
+                                            <div class="uk-text-lead">
+                                                Your Room
+                                    </div>
+                                            <div class="uk-width-expand">
+                                            </div>
+                                            <div class="uk-text-lead">
+                                                0/4
+                                    </div>
+                                            <div>
+                                                <button class="uk-button uk-button-primary uk-width-small">Create</button>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li uk-scrollspy="cls:uk-animation-fade">
+                                        <div class="uk-grid uk-flex uk-flex-middle">
+                                            <div class="uk-text-lead">
+                                                Room 1
+                                    </div>
+                                            <div class="uk-width-expand">
+                                            </div>
+                                            <div class="uk-text-lead">
+                                                1/4
+                                    </div>
+                                            <div>
+                                                <button class="uk-button uk-button-danger uk-width-small">Join</button>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li uk-scrollspy="cls:uk-animation-fade">
+                                        <div class="uk-grid uk-flex uk-flex-middle">
+                                            <div class="uk-text-lead">
+                                                Room 1
+                                    </div>
+                                            <div class="uk-width-expand">
+                                            </div>
+                                            <div class="uk-text-lead">
+                                                1/4
+                                    </div>
+                                            <div>
+                                                <button class="uk-button uk-button-danger uk-width-small">Join</button>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li uk-scrollspy="cls:uk-animation-fade">
+                                        <div class="uk-grid uk-flex uk-flex-middle">
+                                            <div class="uk-text-lead">
+                                                Room 1
+                                    </div>
+                                            <div class="uk-width-expand">
+                                            </div>
+                                            <div class="uk-text-lead">
+                                                1/4
+                                    </div>
+                                            <div>
+                                                <button class="uk-button uk-button-danger uk-width-small">Join</button>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li uk-scrollspy="cls:uk-animation-fade">
+                                        <div class="uk-grid uk-flex uk-flex-middle">
+                                            <div class="uk-text-lead">
+                                                Room 1
+                                    </div>
+                                            <div class="uk-width-expand">
+                                            </div>
+                                            <div class="uk-text-lead">
+                                                1/4
+                                    </div>
+                                            <div>
+                                                <button class="uk-button uk-button-danger uk-width-small">Join</button>
+                                            </div>
+                                        </div>
+                                    </li>                <li uk-scrollspy="cls:uk-animation-fade">
+                                        <div class="uk-grid uk-flex uk-flex-middle">
+                                            <div class="uk-text-lead">
+                                                Room 1
+                                    </div>
+                                            <div class="uk-width-expand">
+                                            </div>
+                                            <div class="uk-text-lead">
+                                                1/4
+                                    </div>
+                                            <div>
+                                                <button class="uk-button uk-button-danger uk-width-small">Join</button>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
+
+                                <div>Total Players: <span class="uk-label uk-label-warning">12431</span></div>
+                            </li>
+                            <li class="uk-animation-fade">
+                                <h2>Drawing Board</h2>
+                            </li>
+                        </ul>
+                    </div>
+                </main>
+                <footer class="uk-background-transparent uk-padding-small">
+                    <div class="uk-container">
+                        <p class="uk-text-meta uk-text-center">Copyright &copy; 2021 samd</p>
+                    </div>
+                </footer>
+            </div>
+
             <input type="submit" value="I'm ready" onClick={() => socket.emit("imready", { user, room })} />
 
             <div className="okeyTable">
@@ -693,8 +886,7 @@ const PlayRoom = () => {
                     </tbody>
                 </table>
             </div>
-
-        </div >
+        </body>
     )
 }
 

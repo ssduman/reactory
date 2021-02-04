@@ -8,19 +8,20 @@ function App() {
 
     return (
         <Router>
-            <Header title="there" />
+            {/* <Header title="there" /> */}
 
             <Route path="/" exact render={(probs) =>
             (
                 <>
                     <PlayRoom />
-                    <Footer />
+                    {/* <Footer /> */}
                 </>
             )} />
 
             <Route path="/play" exact render={(probs) =>
             (
                 <>
+                    <PlayRoom />
                 </>
             )} />
         </Router>
