@@ -19,6 +19,10 @@ const Chat = ({ onSend }) => {
 
     return (
         <form onSubmit={onSubmit}>
+            <div
+                className="chat-box"
+                id="chatbox">
+            </div>
             <div>
                 <textarea
                     name="text-area"
@@ -31,9 +35,6 @@ const Chat = ({ onSend }) => {
                 </textarea>
             </div>
             <input type="submit" value="Send" ></input>
-            <div className="rectangle chat-box" id="chatbox">
-                <div>test</div>
-            </div>
         </form>
     )
 }

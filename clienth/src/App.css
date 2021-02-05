@@ -10,6 +10,7 @@
 .samd-rounded {
   border-radius: 10px;
 }
+
 .samd-rounded-bottom {
   border-radius: 0 0 10px 10px;
 }
@@ -40,6 +41,9 @@
   top: 50px;
   left: -100px;
   position: absolute;
+  text-align: center;
+  font-weight: bold;
+  font-size: 18px;
 }
 
 .rectangleB {
@@ -52,6 +56,9 @@
   top: -60px;
   left: 50px;
   position: absolute;
+  text-align: center;
+  font-weight: bold;
+  font-size: 18px;
 }
 
 .rectangleC {
@@ -64,6 +71,9 @@
   top: 50px;
   left: 600px;
   position: absolute;
+  text-align: center;
+  font-weight: bold;
+  font-size: 18px;
 }
 
 .cell0 {
@@ -170,9 +180,28 @@ th {
 }
 
 textarea {
-  margin-top: 10px;
+  margin-top: 2px;
+  width: 180px;
+  height: 40px;
+}
+
+.rectangleChat {
+  width: 100px;
+  height: 20px;
+  border-width: 10px;
+  margin-left: 10px;
+  top: 100px;
+  left: 700px;
+  position: absolute;
 }
 
 .chat-box {
   overflow-y: scroll;
+  stroke: black;
+  border: solid;
+  width: 180px;
+  height: 100px;
+  overflow: auto;
+  display: flex;
+  flex-direction: column-reverse;
 }

@@ -4,6 +4,7 @@ import _ from 'underscore'
 import queryString from 'query-string'
 import { io } from "socket.io-client"
 import { v4 as uuidv4 } from 'uuid'
+import Chat from "./Chat.js"
 import "../../node_modules/uikit/dist/js/uikit.min.js"
 import "../../node_modules/uikit/dist/js/uikit-icons.min.js"
 import "../../node_modules/uikit/dist/css/uikit.min.css"
@@ -127,13 +128,16 @@ var myLeaderName;
 var myLeftName;
 var myRightName;
 var myOppositeName;
+var playerName;
+var myLeftPlayerName;
+var myRightPlayerName;
+var myOppositePlayerName;
 var myTurn = false
 var tileAllowed = false
 var myLeftTileStack = []
 var user;
 var room;
 const PlayRoom = () => {
-    const [allRooms, setRooms] = useState({ "asdasd": 2 })
 
     const drop = (e) => {
         e.preventDefault()
@@ -167,9 +171,9 @@ const PlayRoom = () => {
                     s.style.color = myLeftTileStack[myLeftTileStack.length - 1][1]
                 }
 
-                cell = document.getElementsByClassName("cell2")
-                cell["0"].innerHTML = s.innerHTML
-                cell["0"].style.color = s.style.color
+                // cell = document.getElementsByClassName("cell2")
+                // cell["0"].innerHTML = s.innerHTML
+                // cell["0"].style.color = s.style.color
 
                 socket.emit("myLeftChanged", mySocketName, myLeaderName, s.innerHTML, s.style.color)
 
@@ -280,10 +284,21 @@ const PlayRoom = () => {
         }
     }
 
+    const onMessageSend = (m, me) => {
+        const div = document.createElement("div")
+        div.innerHTML = m
+        document.getElementById("chatbox").prepend(div)
+
+        if (me) {
+            console.log("room:", room)
+            socket.emit("messageSend", playerName, m, room)
+        }
+    }
+
     useEffect(() => {
         room = queryString.parse(window.location.search).room
 
-        socket = io("/") // http://localhost:4000/
+        socket = io("/") // http://localhost:4000/ or "/"
 
         if (room) {
             socket.emit("joinRoom", user, room)
@@ -324,8 +339,17 @@ const PlayRoom = () => {
             mySocketName = sName
             myLeaderName = lName
             myLeftName = tableMap["left"]
+            myLeftPlayerName = tableMap["leftName"]
+            var lRect = document.getElementsByClassName("rectangleA")[0]
+            lRect.innerHTML = myLeftPlayerName
             myRightName = tableMap["right"]
+            myRightPlayerName = tableMap["rightName"]
+            var rRect = document.getElementsByClassName("rectangleC")[0]
+            rRect.innerHTML = myRightPlayerName
             myOppositeName = tableMap["middle"]
+            myOppositePlayerName = tableMap["middleName"]
+            var oRect = document.getElementsByClassName("rectangleB")[0]
+            oRect.innerHTML = myOppositePlayerName
 
             var okeyTile = document.getElementsByClassName("okeyTile")
             okeyTile["0"].innerHTML = okey[0]
@@ -363,8 +387,17 @@ const PlayRoom = () => {
             mySocketName = sName
             myLeaderName = sName
             myLeftName = tableMap["2"]["left"]
+            myLeftPlayerName = tableMap["2"]["leftName"]
+            var lRect = document.getElementsByClassName("rectangleA")[0]
+            lRect.innerHTML = myLeftPlayerName
             myRightName = tableMap["2"]["right"]
+            myRightPlayerName = tableMap["2"]["rightName"]
+            var rRect = document.getElementsByClassName("rectangleC")[0]
+            rRect.innerHTML = myRightPlayerName
             myOppositeName = tableMap["2"]["middle"]
+            myOppositePlayerName = tableMap["2"]["middleName"]
+            var oRect = document.getElementsByClassName("rectangleB")[0]
+            oRect.innerHTML = myOppositePlayerName
             myTurn = true
             tileAllowed = false
 
@@ -471,6 +504,11 @@ const PlayRoom = () => {
                 cell.innerHTML = number
                 cell.style.color = color
             }
+        })
+
+        socket.on("messageSend", (from, message) => {
+            console.log("client: messageSend", from, message)
+            onMessageSend(message, false)
         })
     }, [])
 
@@ -661,9 +699,35 @@ const PlayRoom = () => {
                             <div>Total Players: <span className="uk-label uk-label-warning">12431</span></div>
                         </li>
                         <li>
-                            <button className="uk-button uk-button-primary" id="readyButton" onClick={() => {
-                                socket.emit("imready", user, room)
-                            }}>
+                            <input
+                                className="uk-input uk-form-width-small"
+                                id="playerName"
+                                type="text"
+                                placeholder="name"
+                                style={{ margin: "10px" }}>
+                            </input>
+                            <button
+                                className="uk-button uk-button-primary"
+                                id="readyButton"
+                                onClick={() => {
+                                    playerName = document.getElementById("playerName").value
+                                    if (!playerName) {
+                                        alert("fill name")
+                                        return
+                                    }
+                                    var readyButton = document.getElementById("readyButton")
+                                    if (readyButton.innerHTML === "Ready") {
+                                        readyButton.classList.remove("uk-button-primary")
+                                        readyButton.classList.add("uk-button-danger")
+                                        readyButton.innerHTML = "Not Ready"
+                                    }
+                                    else {
+                                        readyButton.classList.remove("uk-button-danger")
+                                        readyButton.classList.add("uk-button-primary")
+                                        readyButton.innerHTML = "Ready"
+                                    }
+                                    socket.emit("imready", user, room, playerName)
+                                }}>
                                 Ready
                             </button>
 
@@ -981,6 +1045,9 @@ const PlayRoom = () => {
                                             </tr>
                                         </tbody>
                                     </table>
+                                    <div className="rectangleChat">
+                                        <Chat onSend={(m) => { onMessageSend(playerName + ": " + m, true) }} />
+                                    </div>
                                 </div>
                             </div>
 

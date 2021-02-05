@@ -13,18 +13,6 @@ const io = socket(server, {
 
 io.on('connection', (socket) => {
     console.log('a user connected')
-    // console.log("all room:", io.sockets.adapter.rooms)
-    // console.log("socket.rooms:", socket.rooms)
-
-    const roomObj = {}
-    const roomList = io.sockets.adapter.rooms
-    for (r of roomList) {
-        if (r[0].length === 8) {
-            roomObj[r[0]] = Array.from(r[1])
-        }
-    }
-    console.log("1) roomObj:", roomObj)
-    socket.broadcast.emit("getAllRooms", roomObj)
 
     socket.on("joinRoom", (name, room) => {
         console.log("i joined", room)
@@ -35,23 +23,16 @@ io.on('connection', (socket) => {
         console.log(name + " is left")
     })
 
-    socket.on("messageSend", ({ from, message }) => {
-        socket.broadcast.emit("messageSend", message)
+    socket.on("messageSend", (from, message, room) => {
+        console.log("messageSend:", from, message, room)
+        socket.to(room).emit("messageSend", from, message)
     })
 
-    socket.on("imready", (user, room) => {
-        console.log("imready:", user, " joined in ", room)
+    socket.on("imready", (user, room, name) => {
+        // console.log("imready:", user, " joined in ", room, "name:", name)
+        socket.playerName = name
+        // console.log("socketid:", socket.id, socket.player, io.sockets.sockets.get(socket.id).playerName)
         socket.join(room)
-
-        // const roomObj = {}
-        // const roomList = io.sockets.adapter.rooms
-        // for (r of roomList) {
-        //     if (r[0].length === 8) {
-        //         roomObj[r[0]] = Array.from(r[1])
-        //     }
-        // }
-        // console.log("1) roomObj:", roomObj)
-        // socket.broadcast.emit("getAllRooms", roomObj)
 
         const clients = io.sockets.adapter.rooms.get(room);
         // console.log("clients in the room:", clients)
@@ -61,26 +42,47 @@ io.on('connection', (socket) => {
             let others = Array.from(clients)
             let tableMap = {
                 "0": {
+                    "my": others[0],
+                    "myName": io.sockets.sockets.get(others[0]).playerName,
                     "left": others[1],
+                    "leftName": io.sockets.sockets.get(others[1]).playerName,
                     "right": others[3],
-                    "middle": others[2]
+                    "rightName": io.sockets.sockets.get(others[3]).playerName,
+                    "middle": others[2],
+                    "middleName": io.sockets.sockets.get(others[2]).playerName,
                 },
                 "1": {
+                    "my": others[1],
+                    "myName": io.sockets.sockets.get(others[1]).playerName,
                     "left": others[2],
+                    "leftName": io.sockets.sockets.get(others[2]).playerName,
                     "right": others[0],
-                    "middle": others[3]
+                    "rightName": io.sockets.sockets.get(others[0]).playerName,
+                    "middle": others[3],
+                    "middleName": io.sockets.sockets.get(others[3]).playerName,
                 },
                 "2": {
+                    "my": others[2],
+                    "myName": io.sockets.sockets.get(others[2]).playerName,
                     "left": others[3],
+                    "leftName": io.sockets.sockets.get(others[3]).playerName,
                     "right": others[1],
-                    "middle": others[0]
+                    "rightName": io.sockets.sockets.get(others[1]).playerName,
+                    "middle": others[0],
+                    "middleName": io.sockets.sockets.get(others[0]).playerName,
                 },
                 "3": {
+                    "my": others[3],
+                    "myName": io.sockets.sockets.get(others[3]).playerName,
                     "left": others[0],
+                    "leftName": io.sockets.sockets.get(others[0]).playerName,
                     "right": others[2],
-                    "middle": others[1]
+                    "rightName": io.sockets.sockets.get(others[2]).playerName,
+                    "middle": others[1],
+                    "middleName": io.sockets.sockets.get(others[1]).playerName,
                 }
             }
+            // console.log("tableMap:", tableMap)
             let leader = Array.from(clients)[2]
             others.splice(2, 1)
             io.to(leader).emit("leader", others, room, leader, tableMap)
