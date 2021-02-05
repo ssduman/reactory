@@ -289,7 +289,7 @@ const PlayRoom = () => {
                 return
             }
             else if (e.target.id === "middle" && socket) {
-                if (checkFinish >= 10) {
+                if (checkFinish() >= 10) {
                     socket.emit("requestForOpenTable", room)
     
                     var [row1number, row1color, row2number, row2color] = getMyTable()
