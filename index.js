@@ -95,8 +95,8 @@ io.on('connection', (socket) => {
         io.to(otherClients[2]).emit("getTile", tiles[2], "d_table", otherClients[2], lName, tableMap["3"], okey)
     })
 
-    socket.on("requestTableTile", (client, leader) => {
-        console.log("requestTableTile", client, leader)
+    socket.on("requestTableTile", (client, leader, room) => {
+        socket.to(room).emit("decreaseTableTiles")
         io.to(leader).emit("pickTableTile", client, leader)
     })
 
@@ -116,6 +116,14 @@ io.on('connection', (socket) => {
 
     socket.on("myLeftChanged", (client, leader, number, color) => {
         socket.broadcast.emit("leftChanged", client, number, color)
+    })
+
+    socket.on("requestForOpenTable", (room) => {
+        socket.to(room).emit("sendTable")
+    })
+
+    socket.on("myTable", (r1n, r1c, r2n, r2c, name, room) => {
+        socket.to(room).emit("openTables", r1n, r1c, r2n, r2c, name)
     })
 
     socket.on('disconnect', () => {
