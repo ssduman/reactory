@@ -138,6 +138,8 @@ var myTurn = false
 var tileAllowed = false
 var myLeftTileStack = []
 var totalPerCount;
+var totalReadyPlayer = 0
+var totalReadyPlayerName = []
 var user;
 var room;
 const PlayRoom = () => {
@@ -289,9 +291,9 @@ const PlayRoom = () => {
                 return
             }
             else if (e.target.id === "middle" && socket) {
-                if (checkFinish() >= 10) {
+                if (checkFinish() >= 0) {
                     socket.emit("requestForOpenTable", room)
-    
+
                     var [row1number, row1color, row2number, row2color] = getMyTable()
                     socket.emit("myTable", row1number, row1color, row2number, row2color, mySocketName, room)
                 }
@@ -320,7 +322,6 @@ const PlayRoom = () => {
         document.getElementById("chatbox").prepend(div)
 
         if (me) {
-            console.log("room:", room)
             socket.emit("messageSend", playerName, m, room)
         }
     }
@@ -354,17 +355,16 @@ const PlayRoom = () => {
             let cell = document.getElementById(i.toString())
             let number = cell.innerHTML ? cell.innerHTML : 0
             let color = cell.style.color === "rgb(214, 188, 19)" ? "#d6bc13" : cell.style.color
-            row1number.push(parseInt(number))
+            row1number.push(number === "✿" ? "✿" : parseInt(number))
             row1color.push(color)
         }
         for (var i = 15; i < 29; i++) {
             let cell = document.getElementById(i.toString())
             let number = cell.innerHTML ? cell.innerHTML : 0
             let color = cell.style.color === "rgb(214, 188, 19)" ? "#d6bc13" : cell.style.color
-            row2number.push(parseInt(number))
+            row2number.push(number === "✿" ? "✿" : parseInt(number))
             row2color.push(color)
         }
-        console.log(row1number, row1color, row2number, row2color)
 
         return [row1number, row1color, row2number, row2color]
     }
@@ -434,14 +434,35 @@ const PlayRoom = () => {
             }
         }
 
-        console.log("totalPerCount:", totalPerCount)
         document.getElementById("perCount").innerHTML = "Total per: " + totalPerCount
 
         return totalPerCount
     }
 
     const constructTable = (row1number, row1color, row2number, row2color, order, rotate, top, left) => {
-        console.log("row1number, row1color, row2number, row2color", row1number, row1color, row2number, row2color)
+        row1number = row1number.map((t) => {
+            if (t === 0) {
+                return ""
+            }
+            else if (t === -1) {
+                return "✿"
+            }
+            else {
+                return t
+            }
+        })
+        row2number = row2number.map((t) => {
+            if (t === 0) {
+                return ""
+            }
+            else if (t === -1) {
+                return "✿"
+            }
+            else {
+                return t
+            }
+        })
+
         const t =
             <table
                 className="uk-table uk-table-small uk-table-middle .uk-width-20 myTable1"
@@ -453,40 +474,38 @@ const PlayRoom = () => {
                     left: left,
                 }}>
                 <tr>
-                    <td id={"0" + order} style={{ color: row1color[0] }}>{row1number[0] !== 0 ? row1number[0] : ""}</td>
-                    <td id={"1" + order} style={{ color: row1color[1] }}>{row1number[1] !== 0 ? row1number[1] : ""}</td>
-                    <td id={"2" + order} style={{ color: row1color[2] }}>{row1number[2] !== 0 ? row1number[2] : ""}</td>
-                    <td id={"3" + order} style={{ color: row1color[3] }}>{row1number[3] !== 0 ? row1number[3] : ""}</td>
-                    <td id={"4" + order} style={{ color: row1color[4] }}>{row1number[4] !== 0 ? row1number[4] : ""}</td>
-                    <td id={"5" + order} style={{ color: row1color[5] }}>{row1number[5] !== 0 ? row1number[5] : ""}</td>
-                    <td id={"6" + order} style={{ color: row1color[6] }}>{row1number[6] !== 0 ? row1number[6] : ""}</td>
-                    <td id={"7" + order} style={{ color: row1color[7] }}>{row1number[7] !== 0 ? row1number[7] : ""}</td>
-                    <td id={"8" + order} style={{ color: row1color[8] }}>{row1number[8] !== 0 ? row1number[8] : ""}</td>
-                    <td id={"9" + order} style={{ color: row1color[9] }}>{row1number[9] !== 0 ? row1number[9] : ""}</td>
-                    <td id={"10" + order} style={{ color: row1color[10] }}>{row1number[10] !== 0 ? row1number[10] : ""}</td>
-                    <td id={"11" + order} style={{ color: row1color[11] }}>{row1number[11] !== 0 ? row1number[11] : ""}</td>
-                    <td id={"12" + order} style={{ color: row1color[12] }}>{row1number[12] !== 0 ? row1number[12] : ""}</td>
-                    <td id={"13" + order} style={{ color: row1color[13] }}>{row1number[13] !== 0 ? row1number[13] : ""}</td>
+                    <td id={"0" + order} style={{ color: row1color[0] }}>{row1number[0]}</td>
+                    <td id={"1" + order} style={{ color: row1color[1] }}>{row1number[1]}</td>
+                    <td id={"2" + order} style={{ color: row1color[2] }}>{row1number[2]}</td>
+                    <td id={"3" + order} style={{ color: row1color[3] }}>{row1number[3]}</td>
+                    <td id={"4" + order} style={{ color: row1color[4] }}>{row1number[4]}</td>
+                    <td id={"5" + order} style={{ color: row1color[5] }}>{row1number[5]}</td>
+                    <td id={"6" + order} style={{ color: row1color[6] }}>{row1number[6]}</td>
+                    <td id={"7" + order} style={{ color: row1color[7] }}>{row1number[7]}</td>
+                    <td id={"8" + order} style={{ color: row1color[8] }}>{row1number[8]}</td>
+                    <td id={"9" + order} style={{ color: row1color[9] }}>{row1number[9]}</td>
+                    <td id={"10" + order} style={{ color: row1color[10] }}>{row1number[10]}</td>
+                    <td id={"11" + order} style={{ color: row1color[11] }}>{row1number[11]}</td>
+                    <td id={"12" + order} style={{ color: row1color[12] }}>{row1number[12]}</td>
+                    <td id={"13" + order} style={{ color: row1color[13] }}>{row1number[13]}</td>
                 </tr>
                 <tr>
-                    <td id={"14" + order} style={{ color: row2color[0] }}>{row2number[0] !== 0 ? row2number[0] : ""}</td>
-                    <td id={"15" + order} style={{ color: row2color[1] }}>{row2number[1] !== 0 ? row2number[1] : ""}</td>
-                    <td id={"16" + order} style={{ color: row2color[2] }}>{row2number[2] !== 0 ? row2number[2] : ""}</td>
-                    <td id={"17" + order} style={{ color: row2color[3] }}>{row2number[3] !== 0 ? row2number[3] : ""}</td>
-                    <td id={"18" + order} style={{ color: row2color[4] }}>{row2number[4] !== 0 ? row2number[4] : ""}</td>
-                    <td id={"19" + order} style={{ color: row2color[5] }}>{row2number[5] !== 0 ? row2number[5] : ""}</td>
-                    <td id={"20" + order} style={{ color: row2color[6] }}>{row2number[6] !== 0 ? row2number[6] : ""}</td>
-                    <td id={"21" + order} style={{ color: row2color[7] }}>{row2number[7] !== 0 ? row2number[7] : ""}</td>
-                    <td id={"22" + order} style={{ color: row2color[8] }}>{row2number[8] !== 0 ? row2number[8] : ""}</td>
-                    <td id={"23" + order} style={{ color: row2color[9] }}>{row2number[9] !== 0 ? row2number[9] : ""}</td>
-                    <td id={"24" + order} style={{ color: row2color[10] }}>{row2number[10] !== 0 ? row2number[10] : ""}</td>
-                    <td id={"25" + order} style={{ color: row2color[11] }}>{row2number[11] !== 0 ? row2number[11] : ""}</td>
-                    <td id={"26" + order} style={{ color: row2color[12] }}>{row2number[12] !== 0 ? row2number[12] : ""}</td>
-                    <td id={"27" + order} style={{ color: row2color[13] }}>{row2number[13] !== 0 ? row2number[13] : ""}</td>
+                    <td id={"14" + order} style={{ color: row2color[0] }}>{row2number[0]}</td>
+                    <td id={"15" + order} style={{ color: row2color[1] }}>{row2number[1]}</td>
+                    <td id={"16" + order} style={{ color: row2color[2] }}>{row2number[2]}</td>
+                    <td id={"17" + order} style={{ color: row2color[3] }}>{row2number[3]}</td>
+                    <td id={"18" + order} style={{ color: row2color[4] }}>{row2number[4]}</td>
+                    <td id={"19" + order} style={{ color: row2color[5] }}>{row2number[5]}</td>
+                    <td id={"20" + order} style={{ color: row2color[6] }}>{row2number[6]}</td>
+                    <td id={"21" + order} style={{ color: row2color[7] }}>{row2number[7]}</td>
+                    <td id={"22" + order} style={{ color: row2color[8] }}>{row2number[8]}</td>
+                    <td id={"23" + order} style={{ color: row2color[9] }}>{row2number[9]}</td>
+                    <td id={"24" + order} style={{ color: row2color[10] }}>{row2number[10]}</td>
+                    <td id={"25" + order} style={{ color: row2color[11] }}>{row2number[11]}</td>
+                    <td id={"26" + order} style={{ color: row2color[12] }}>{row2number[12]}</td>
+                    <td id={"27" + order} style={{ color: row2color[13] }}>{row2number[13]}</td>
                 </tr>
             </table>
-        console.log("t:", t)
-        console.log("constructTable", ReactDOMServer.renderToStaticMarkup(t))
         return ReactDOMServer.renderToStaticMarkup(t)
     }
 
@@ -498,6 +517,42 @@ const PlayRoom = () => {
         if (room) {
             socket.emit("joinRoom", user, room)
         }
+
+        socket.on("playersInTheRoom", (pList) => {
+            if (pList.length > 4) {
+                return
+            }
+            totalReadyPlayer = pList.length
+            totalReadyPlayerName = pList
+            document.getElementById("readyPlayerDiv").innerHTML = "Ready Players: " + totalReadyPlayer + "/4"
+            for (let i = 0; i < pList.length; i++) {
+                document.getElementById("readyPlayerDiv" + (i + 1)).innerHTML = totalReadyPlayerName[i]
+            }
+        })
+
+        socket.on("userDisconnected", (socketid) => {
+            if (socketid === myLeftName) {
+                totalReadyPlayer -= 1
+                document.getElementById("readyPlayerDiv").innerHTML = "Ready Players: " + totalReadyPlayer + "/4"
+                let index = totalReadyPlayerName.indexOf(myLeftPlayerName)
+                totalReadyPlayerName.splice(index, 1)
+                document.getElementById("readyPlayerDiv" + (index + 1)).innerHTML = ""
+            }
+            else if (socketid === myRightName) {
+                totalReadyPlayer -= 1
+                document.getElementById("readyPlayerDiv").innerHTML = "Ready Players: " + totalReadyPlayer + "/4"
+                let index = totalReadyPlayerName.indexOf(myRightPlayerName)
+                totalReadyPlayerName.splice(index, 1)
+                document.getElementById("readyPlayerDiv" + (index + 1)).innerHTML = ""
+            }
+            else if (socketid === myOppositeName) {
+                totalReadyPlayer -= 1
+                document.getElementById("readyPlayerDiv").innerHTML = "Ready Players: " + totalReadyPlayer + "/4"
+                let index = totalReadyPlayerName.indexOf(myOppositePlayerName)
+                totalReadyPlayerName.splice(index, 1)
+                document.getElementById("readyPlayerDiv" + (index + 1)).innerHTML = ""
+            }
+        })
 
         socket.on("getAllRooms1", (rooms) => {
             for (const [key, value] of Object.entries(rooms)) {
@@ -591,7 +646,6 @@ const PlayRoom = () => {
         })
 
         socket.on("leader", (otherClients, room, sName, tableMap) => {
-            // console.log("I'm leader", otherClients, "...room:", room, "...", "lName:", sName, "...")
             myTableName = "c_table"
             mySocketName = sName
             myLeaderName = sName
@@ -677,7 +731,6 @@ const PlayRoom = () => {
             var divRectC;
             var divRectD;
             if (myLeftName === right) {
-                console.log("1")
                 divRectA = document.getElementsByClassName("rectangleA")[0]
                 divRectA.style.boxShadow = "0px 0px 5px 4px rgba(51,136,86,0.64)"
                 divRectA.style.color = "rgba(51,136,86,0.64)"
@@ -695,7 +748,6 @@ const PlayRoom = () => {
                 divRectD.style.color = "black"
             }
             if (myRightName === right) {
-                console.log("2")
                 divRectA = document.getElementsByClassName("rectangleA")[0]
                 divRectA.style.boxShadow = ""
                 divRectA.style.color = "black"
@@ -713,7 +765,6 @@ const PlayRoom = () => {
                 divRectD.style.color = "black"
             }
             if (myOppositeName === right) {
-                console.log("3")
                 divRectA = document.getElementsByClassName("rectangleA")[0]
                 divRectA.style.boxShadow = ""
                 divRectA.style.color = "black"
@@ -731,7 +782,6 @@ const PlayRoom = () => {
                 divRectD.style.color = "black"
             }
             if (mySocketName === right) {
-                console.log("4")
                 divRectA = document.getElementsByClassName("rectangleA")[0]
                 divRectA.style.boxShadow = ""
                 divRectA.style.color = "black"
@@ -808,7 +858,6 @@ const PlayRoom = () => {
         })
 
         socket.on("openTables", (row1number, row1color, row2number, row2color, sender) => {
-            console.log(row1number, row1color, row2number, row2color)
             var div = document.getElementsByClassName("okeyTable")[0]
             var t;
             if (sender === myLeftName) {
@@ -826,7 +875,6 @@ const PlayRoom = () => {
         })
 
         socket.on("messageSend", (from, message) => {
-            console.log("client: messageSend", from, message)
             onMessageSend(message, false)
         })
     }, [])
@@ -1036,20 +1084,24 @@ const PlayRoom = () => {
                                     }
                                     var readyButton = document.getElementById("readyButton")
                                     if (readyButton.innerHTML === "Ready") {
-                                        readyButton.classList.remove("uk-button-primary")
                                         readyButton.classList.add("uk-button-danger")
+                                        readyButton.classList.remove("uk-button-primary")
                                         readyButton.innerHTML = "Not Ready"
                                     }
                                     else {
-                                        readyButton.classList.remove("uk-button-danger")
-                                        readyButton.classList.add("uk-button-primary")
-                                        readyButton.innerHTML = "Ready"
+                                        // readyButton.classList.add("uk-button-primary")
+                                        // readyButton.classList.remove("uk-button-danger")
+                                        // readyButton.innerHTML = "Ready"
                                     }
-                                    socket.emit("imready", user, room, playerName)
+                                    if (totalReadyPlayer < 4) {
+                                        totalReadyPlayer += 1
+                                        document.getElementById("readyPlayerDiv").innerHTML = "Ready Players: " + totalReadyPlayer + "/4"
+                                        document.getElementById("readyPlayerDiv" + totalReadyPlayer).innerHTML = playerName
+                                        socket.emit("imready", user, room, playerName)
+                                    }
                                 }}>
                                 Ready
                             </button>
-
 
                             <div className="uk-flex uk-flex-middle uk-flex-center">
                                 <div className="okeyTable">
@@ -1371,9 +1423,15 @@ const PlayRoom = () => {
                                     </table>
                                     <div className="rectangleChat">
                                         <Chat onSend={(m) => { onMessageSend(playerName + ": " + m, true) }} />
+                                        <div id="readyPlayerDiv"> Ready Players: {totalReadyPlayer}/4 </div>
+                                        <div id="readyPlayerDiv1"></div>
+                                        <div id="readyPlayerDiv2"></div>
+                                        <div id="readyPlayerDiv3"></div>
+                                        <div id="readyPlayerDiv4"></div>
                                     </div>
                                 </div>
                             </div>
+
                             <button className="uk-button uk-button-primary"
                                 id="readyButton"
                                 onClick={() => { checkFinish() }}>
