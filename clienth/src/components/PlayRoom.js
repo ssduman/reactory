@@ -272,6 +272,9 @@ const PlayRoom = () => {
                     var divRectD = document.getElementsByClassName("rectangleD")[0]
                     divRectD.style.boxShadow = ""
                     divRectD.style.color = "black"
+                    divRectD = document.getElementsByClassName("rectangleD")[1]
+                    divRectD.style.boxShadow = ""
+                    divRectD.style.color = "black"
 
                     s.innerHTML = ""
                     s.style.color = ""
@@ -291,7 +294,7 @@ const PlayRoom = () => {
                 return
             }
             else if (e.target.id === "middle" && socket) {
-                if (checkFinish() >= 0) {
+                if (checkFinish() >= 9) {
                     socket.emit("requestForOpenTable", room)
 
                     var [row1number, row1color, row2number, row2color] = getMyTable()
@@ -712,6 +715,9 @@ const PlayRoom = () => {
             var divRectD = document.getElementsByClassName("rectangleD")[0]
             divRectD.style.boxShadow = "0px 0px 5px 4px rgba(51,136,86,0.64)"
             divRectD.style.color = "rgba(51,136,86,0.64)"
+            divRectD = document.getElementsByClassName("rectangleD")[1]
+            divRectD.style.boxShadow = "0px 0px 5px 4px rgba(51,136,86,0.64)"
+            divRectD.style.color = "rgba(51,136,86,0.64)"
 
             socket.emit("tilesReady", otherClients, room, [b_tile, c_tile, d_tile], sName, tableMap, okey)
         })
@@ -746,6 +752,9 @@ const PlayRoom = () => {
                 divRectD = document.getElementsByClassName("rectangleD")[0]
                 divRectD.style.boxShadow = ""
                 divRectD.style.color = "black"
+                divRectD = document.getElementsByClassName("rectangleD")[1]
+                divRectD.style.boxShadow = ""
+                divRectD.style.color = "black"
             }
             if (myRightName === right) {
                 divRectA = document.getElementsByClassName("rectangleA")[0]
@@ -761,6 +770,9 @@ const PlayRoom = () => {
                 divRectC.style.color = "black"
 
                 divRectD = document.getElementsByClassName("rectangleD")[0]
+                divRectD.style.boxShadow = ""
+                divRectD.style.color = "black"
+                divRectD = document.getElementsByClassName("rectangleD")[1]
                 divRectD.style.boxShadow = ""
                 divRectD.style.color = "black"
             }
@@ -780,6 +792,9 @@ const PlayRoom = () => {
                 divRectD = document.getElementsByClassName("rectangleD")[0]
                 divRectD.style.boxShadow = ""
                 divRectD.style.color = "black"
+                divRectD = document.getElementsByClassName("rectangleD")[1]
+                divRectD.style.boxShadow = ""
+                divRectD.style.color = "black"
             }
             if (mySocketName === right) {
                 divRectA = document.getElementsByClassName("rectangleA")[0]
@@ -795,6 +810,9 @@ const PlayRoom = () => {
                 divRectC.style.color = "black"
 
                 divRectD = document.getElementsByClassName("rectangleD")[0]
+                divRectD.style.boxShadow = "0px 0px 5px 4px rgba(51,136,86,0.64)"
+                divRectD.style.color = "rgba(51,136,86,0.64)"
+                divRectD = document.getElementsByClassName("rectangleD")[1]
                 divRectD.style.boxShadow = "0px 0px 5px 4px rgba(51,136,86,0.64)"
                 divRectD.style.color = "rgba(51,136,86,0.64)"
             }
@@ -1084,20 +1102,15 @@ const PlayRoom = () => {
                                     }
                                     var readyButton = document.getElementById("readyButton")
                                     if (readyButton.innerHTML === "Ready") {
-                                        readyButton.classList.add("uk-button-danger")
-                                        readyButton.classList.remove("uk-button-primary")
-                                        readyButton.innerHTML = "Not Ready"
-                                    }
-                                    else {
-                                        // readyButton.classList.add("uk-button-primary")
-                                        // readyButton.classList.remove("uk-button-danger")
-                                        // readyButton.innerHTML = "Ready"
-                                    }
-                                    if (totalReadyPlayer < 4) {
-                                        totalReadyPlayer += 1
-                                        document.getElementById("readyPlayerDiv").innerHTML = "Ready Players: " + totalReadyPlayer + "/4"
-                                        document.getElementById("readyPlayerDiv" + totalReadyPlayer).innerHTML = playerName
-                                        socket.emit("imready", user, room, playerName)
+                                        if (totalReadyPlayer < 4) {
+                                            readyButton.style.backgroundColor = "rgb(89, 147, 97)"
+                                            readyButton.style.cursor = "default"
+                                            readyButton.innerHTML = "Ready ✓"
+                                            totalReadyPlayer += 1
+                                            document.getElementById("readyPlayerDiv").innerHTML = "Ready Players: " + totalReadyPlayer + "/4"
+                                            document.getElementById("readyPlayerDiv" + totalReadyPlayer).innerHTML = playerName
+                                            socket.emit("imready", user, room, playerName)
+                                        }
                                     }
                                 }}>
                                 Ready
@@ -1246,7 +1259,7 @@ const PlayRoom = () => {
 
                                             </tr>
 
-                                            <tr>
+                                            <tr className="rectangleD">
                                                 <td onDoubleClick={(e) => reverseOkeyTile(e)}
                                                     id="1"
                                                     draggable={true}
@@ -1433,9 +1446,9 @@ const PlayRoom = () => {
                             </div>
 
                             <button className="uk-button uk-button-primary"
-                                id="readyButton"
+                                id="calculateButton"
                                 onClick={() => { checkFinish() }}>
-                                Finish
+                                Calculate
                             </button>
                             <span id="perCount" style={{ marginLeft: "4px" }}>Total per: </span>
                         </li>
@@ -1451,8 +1464,6 @@ const PlayRoom = () => {
                 </div>
             </footer>
         </div>
-
-
     )
 }
 

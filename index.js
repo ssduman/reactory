@@ -36,7 +36,7 @@ io.on('connection', (socket) => {
 
     socket.on("messageSend", (from, message, room) => {
         // console.log("messageSend:", from, message, room)
-        socket.to(room).emit("messageSend", from, message)
+        socket.to(room + "temp").emit("messageSend", from, message)
     })
 
     socket.on("imready", (user, room, name) => {

@@ -172,7 +172,6 @@
 table,
 th,
 td {
-  overflow: hidden;
   border-collapse: collapse;
   table-layout: fixed;
   border: 0px solid black;
