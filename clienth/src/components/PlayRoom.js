@@ -167,6 +167,8 @@ const PlayRoom = () => {
                 e.target.innerHTML = s.innerHTML
                 e.target.style.color = s.style.color
 
+                document.getElementsByClassName("cell2")[0].style.color = "black"
+
                 myLeftTileStack.pop()
                 if (myLeftTileStack.length === 0) {
                     s.innerHTML = ""
@@ -255,6 +257,8 @@ const PlayRoom = () => {
                     e.target.innerHTML = s.innerHTML
                     e.target.style.color = s.style.color
                     s.style.transform = ""
+
+                    document.getElementsByClassName("cell1")[0].style.color = e.target.style.color
 
                     socket.emit("sendToRight", room, mySocketName, myLeaderName, myLeftName, myRightName, myOppositeName, s.style.color + "-" + s.innerHTML)
 
@@ -513,7 +517,7 @@ const PlayRoom = () => {
         return ReactDOMServer.renderToStaticMarkup(t)
     }
 
-    const createRoomEntry = (room, people) => {
+    const createRoomEntry = (room, people, roomName) => {
         let sum = people && Object.keys(people).length !== 0 ? Object.values(people).reduce((a, b) => a + b) : 0
         totalOnlinePlayers += sum
         document.getElementById("onlinePlayers").innerHTML = totalOnlinePlayers
@@ -521,7 +525,7 @@ const PlayRoom = () => {
             <li uk-scrollspy="cls:uk-animation-fade" id={"listhead-" + room}>
                 <div className="uk-grid uk-flex uk-flex-middle">
                     <div className="uk-text-lead" id={"listname-" + room}>
-                        {room}
+                        {roomName && roomName[room] ? roomName[room] : room}
                     </div>
                     <div className="uk-width-expand"> </div>
                     <div className="uk-text-lead" id={"listcount-" + room}>
@@ -594,20 +598,23 @@ const PlayRoom = () => {
             }
         })
 
-        socket.on("getAllRooms", (rooms) => {
+        socket.on("getAllRooms", (rooms, roomNames) => {
             for (const [room, people] of Object.entries(rooms)) {
-                createRoomEntry(room, people)
+                createRoomEntry(room, people, roomNames)
             }
         })
 
-        socket.on("getAllRoomsNew", (rooms, room) => {
+        socket.on("getAllRoomsNew", (rooms, room, roomName) => {
             if (!document.getElementById("listcount-" + room)) {
-                createRoomEntry(room, rooms[room])
+                createRoomEntry(room, rooms[room], roomName)
             }
         })
 
         socket.on("getAllRoomsUpd", (rooms, room) => {
             let sum = rooms[room] && Object.keys(rooms[room]).length !== 0 ? Object.values(rooms[room]).reduce((a, b) => a + b) : 0
+            if (!document.getElementById("listcount-" + room)) {
+                return
+            }
             let old = document.getElementById("listcount-" + room).innerHTML
             let oldN = parseInt(old.split("/")[0])
             totalOnlinePlayers += (sum - oldN)
@@ -789,7 +796,7 @@ const PlayRoom = () => {
                 divRectD.style.boxShadow = ""
                 divRectD.style.color = "black"
             }
-            if (myRightName === right) {
+            else if (myRightName === right) {
                 divRectA = document.getElementsByClassName("rectangleA")[0]
                 divRectA.style.boxShadow = ""
                 divRectA.style.color = "black"
@@ -809,7 +816,7 @@ const PlayRoom = () => {
                 divRectD.style.boxShadow = ""
                 divRectD.style.color = "black"
             }
-            if (myOppositeName === right) {
+            else if (myOppositeName === right) {
                 divRectA = document.getElementsByClassName("rectangleA")[0]
                 divRectA.style.boxShadow = ""
                 divRectA.style.color = "black"
@@ -829,7 +836,7 @@ const PlayRoom = () => {
                 divRectD.style.boxShadow = ""
                 divRectD.style.color = "black"
             }
-            if (mySocketName === right) {
+            else if (mySocketName === right) {
                 divRectA = document.getElementsByClassName("rectangleA")[0]
                 divRectA.style.boxShadow = ""
                 divRectA.style.color = "black"
@@ -854,11 +861,13 @@ const PlayRoom = () => {
                 var entry = document.getElementById("right")
                 entry.innerHTML = number
                 entry.style.color = color
+                document.getElementsByClassName("cell1")[0].style.color = color
             }
             else if (mySocketName === left) {
                 cell = document.getElementById("tableCell0")
                 cell.innerHTML = number
                 cell.style.color = color
+                document.getElementsByClassName("cell0")[0].style.color = color
             }
             else if (mySocketName === right) {
                 myLeftTileStack.push([number, color])
@@ -866,11 +875,13 @@ const PlayRoom = () => {
                 entry = document.getElementById("left")
                 entry.innerHTML = number
                 entry.style.color = color
+                document.getElementsByClassName("cell2")[0].style.color = color
             }
             else if (mySocketName === middle) {
                 cell = document.getElementById("tableCell3")
                 cell.innerHTML = number
                 cell.style.color = color
+                document.getElementsByClassName("cell3")[0].style.color = color
             }
         })
 
@@ -885,16 +896,19 @@ const PlayRoom = () => {
                 cell = document.getElementById("tableCell3")
                 cell.innerHTML = number
                 cell.style.color = color
+                document.getElementsByClassName("cell3")[0].style.color = color
             }
             else if (client === myRightName) {
                 cell = document.getElementById("right")
                 cell.innerHTML = number
                 cell.style.color = color
+                document.getElementsByClassName("cell1")[0].style.color = color
             }
             else if (client === myOppositeName) {
                 cell = document.getElementById("tableCell0")
                 cell.innerHTML = number
                 cell.style.color = color
+                document.getElementsByClassName("cell0")[0].style.color = color
             }
         })
 
@@ -939,7 +953,7 @@ const PlayRoom = () => {
             </header>
             <nav className="uk-background-transparent uk-padding-small">
                 <div className="uk-container uk-flex uk-flex-center uk-flex-middle">
-                    <ul className="uk-subnav uk-subnav-divider" uk-switcher="connect: #pages" active={queryString.parse(window.location.search).room ? "4" : "0"} uk-margin="true">
+                    <ul className="uk-subnav uk-subnav-divider" uk-switcher="connect: #pages" active={queryString.parse(window.location.search).room ? "4" : "3"} uk-margin="true">
                         <li><a href="/#">Home</a></li>
                         <li><a href="/#">About</a></li>
                         <li><a href="/#">Blog</a></li>
@@ -1024,6 +1038,13 @@ const PlayRoom = () => {
                                             Your Room
                                         </div>
                                         <div className="uk-width-expand"> </div>
+                                        <input
+                                            className="uk-input uk-form-width-small"
+                                            id="roomName"
+                                            type="text"
+                                            placeholder="name"
+                                            style={{ margin: "10px", paddingLeft: "10px" }}>
+                                        </input>
                                         <div className="uk-text-lead">
                                             0/4
                                         </div>
@@ -1031,10 +1052,15 @@ const PlayRoom = () => {
                                             <button
                                                 className="uk-button uk-button-primary uk-width-small"
                                                 onClick={() => {
+                                                    let roomName = document.getElementById("roomName").value
+                                                    if (!roomName) {
+                                                        alert("fill name")
+                                                        return
+                                                    }
                                                     const randomURL = uuidv4().split("-")[0]
                                                     const addURL = "?room=" + randomURL
                                                     window.location.href += addURL
-                                                    socket.emit("joinRoom", user, randomURL)
+                                                    socket.emit("joinRoom", user, randomURL, roomName)
                                                     createRoomEntry(randomURL, { "me": 0 })
                                                 }}>
                                                 Create
@@ -1044,9 +1070,9 @@ const PlayRoom = () => {
                                 </li>
                             </ul>
 
-                            <div>Total Players: <span className="uk-label uk-label-warning" id="onlinePlayers">1</span></div>
+                        <div className="uk-flex uk-flex-bottom" style={{ position: "absolute", bottom: "80px"}}>Total Players: <span className="uk-label uk-label-warning" id="onlinePlayers"> 1</span></div>
                         </li>
-                        <li>
+                        <li className="uk-animation-fade">
                             <input
                                 className="uk-input uk-form-width-small"
                                 id="playerName"

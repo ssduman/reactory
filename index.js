@@ -12,12 +12,17 @@ const io = socket(server, {
 })
 
 var allRooms = {}
+var roomNameMap = {}
 
 io.on("connection", (socket) => {
     // console.log("a user connected:", allRooms)
 
-    socket.on("joinRoom", (name, room) => {
+    socket.on("joinRoom", (name, room, roomName) => {
         socket.join(room + "temp")
+
+        if (!(roomName in roomNameMap) && roomName) {
+            roomNameMap[room] = roomName
+        }
 
         if (room in allRooms) {
             allRooms[room][socket.id] = 0
@@ -26,7 +31,7 @@ io.on("connection", (socket) => {
             allRooms[room] = {}
             allRooms[room][socket.id] = 0
         }
-        socket.broadcast.emit("getAllRoomsNew", allRooms, room)
+        socket.broadcast.emit("getAllRoomsNew", allRooms, room, roomNameMap[room])
 
         let clients = io.sockets.adapter.rooms.get(room)
         let numClients = clients ? clients.size : 0
@@ -42,7 +47,7 @@ io.on("connection", (socket) => {
     })
 
     socket.on("requestAllRoom", () => {
-        io.to(socket.id).emit("getAllRooms", allRooms)
+        io.to(socket.id).emit("getAllRooms", allRooms, roomNameMap)
     })
 
     socket.on("left", (name) => {
@@ -63,7 +68,7 @@ io.on("connection", (socket) => {
         else {
             allRooms[room] = {}
             allRooms[room][socket.id] = 1
-            socket.broadcast.emit("getAllRoomsNew", allRooms, room)
+            socket.broadcast.emit("getAllRoomsNew", allRooms, room, roomNameMap[room])
         }
 
         let clients = io.sockets.adapter.rooms.get(room)
