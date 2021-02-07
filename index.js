@@ -11,11 +11,22 @@ const io = socket(server, {
     }
 })
 
-io.on('connection', (socket) => {
-    // console.log('a user connected')
+var allRooms = {}
+
+io.on("connection", (socket) => {
+    // console.log("a user connected:", allRooms)
 
     socket.on("joinRoom", (name, room) => {
         socket.join(room + "temp")
+
+        if (room in allRooms) {
+            allRooms[room][socket.id] = 0
+        }
+        else {
+            allRooms[room] = {}
+            allRooms[room][socket.id] = 0
+        }
+        socket.broadcast.emit("getAllRoomsNew", allRooms, room)
 
         let clients = io.sockets.adapter.rooms.get(room)
         let numClients = clients ? clients.size : 0
@@ -30,18 +41,30 @@ io.on('connection', (socket) => {
         }
     })
 
+    socket.on("requestAllRoom", () => {
+        io.to(socket.id).emit("getAllRooms", allRooms)
+    })
+
     socket.on("left", (name) => {
-        // console.log(name + " is left")
     })
 
     socket.on("messageSend", (from, message, room) => {
-        // console.log("messageSend:", from, message, room)
         socket.to(room + "temp").emit("messageSend", from, message)
     })
 
     socket.on("imready", (user, room, name) => {
         socket.playerName = name
         socket.join(room)
+
+        if (room in allRooms) {
+            allRooms[room][socket.id] = 1
+            socket.broadcast.emit("getAllRoomsUpd", allRooms, room)
+        }
+        else {
+            allRooms[room] = {}
+            allRooms[room][socket.id] = 1
+            socket.broadcast.emit("getAllRoomsNew", allRooms, room)
+        }
 
         let clients = io.sockets.adapter.rooms.get(room)
         let numClients = clients ? clients.size : 0
@@ -115,13 +138,11 @@ io.on('connection', (socket) => {
     })
 
     socket.on("sendTableTile", (client, leader, tile) => {
-        // console.log("sendTableTile", client, leader, tile)
         io.to(client).emit("getTableTile", client, leader, tile)
     })
 
-    socket.on("sendToRight", (client, leader, left, right, middle, tile) => {
-        // console.log("sendToRight", client, leader, left, right, middle, tile)
-        socket.broadcast.emit("sendRight", client, leader, left, right, middle, tile)
+    socket.on("sendToRight", (room, client, leader, left, right, middle, tile) => {
+        socket.to(room).emit("sendRight", client, leader, left, right, middle, tile)
     })
 
     socket.on("nextTurn", (right) => {
@@ -141,8 +162,23 @@ io.on('connection', (socket) => {
     })
 
     socket.on('disconnect', () => {
-        // console.log('user disconnected:', socket.id)
         socket.broadcast.emit("userDisconnected", socket.id)
+
+        for (const [room, people] of Object.entries(allRooms)) {
+            for (const [player, ready] of Object.entries(people)) {
+                if (socket.id === player) {
+                    delete allRooms[room][player]
+                    if (Object.keys(allRooms[room]).length === 0) {
+                        delete allRooms[room]
+                        socket.broadcast.emit("getAllRoomsDeleted", room)
+                    }
+                    else {
+                        socket.broadcast.emit("getAllRoomsUpd", allRooms, room)
+                    }
+                }
+            }
+        }
+        
         socket.removeAllListeners()
     })
 })

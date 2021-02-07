@@ -1,7 +1,7 @@
 import React from 'react'
 import { useState, useEffect } from "react"
 import ReactDOMServer from 'react-dom/server'
-import _ from 'underscore'
+import _, { create } from 'underscore'
 import queryString from 'query-string'
 import { io } from "socket.io-client"
 import { v4 as uuidv4 } from 'uuid'
@@ -140,6 +140,7 @@ var myLeftTileStack = []
 var totalPerCount;
 var totalReadyPlayer = 0
 var totalReadyPlayerName = []
+var totalOnlinePlayers = 1
 var user;
 var room;
 const PlayRoom = () => {
@@ -255,7 +256,7 @@ const PlayRoom = () => {
                     e.target.style.color = s.style.color
                     s.style.transform = ""
 
-                    socket.emit("sendToRight", mySocketName, myLeaderName, myLeftName, myRightName, myOppositeName, s.style.color + "-" + s.innerHTML)
+                    socket.emit("sendToRight", room, mySocketName, myLeaderName, myLeftName, myRightName, myOppositeName, s.style.color + "-" + s.innerHTML)
 
                     var divRectA = document.getElementsByClassName("rectangleA")[0]
                     divRectA.style.boxShadow = ""
@@ -512,13 +513,49 @@ const PlayRoom = () => {
         return ReactDOMServer.renderToStaticMarkup(t)
     }
 
+    const createRoomEntry = (room, people) => {
+        let sum = people && Object.keys(people).length !== 0 ? Object.values(people).reduce((a, b) => a + b) : 0
+        totalOnlinePlayers += sum
+        document.getElementById("onlinePlayers").innerHTML = totalOnlinePlayers
+        const nEnrty =
+            <li uk-scrollspy="cls:uk-animation-fade" id={"listhead-" + room}>
+                <div className="uk-grid uk-flex uk-flex-middle">
+                    <div className="uk-text-lead" id={"listname-" + room}>
+                        {room}
+                    </div>
+                    <div className="uk-width-expand"> </div>
+                    <div className="uk-text-lead" id={"listcount-" + room}>
+                        {sum + "/4"}
+                    </div>
+                    <div>
+                        <button
+                            className="uk-button uk-button-danger uk-width-small"
+                            id={"join-" + room}>
+                            Join
+                    </button>
+                    </div>
+                </div>
+            </li>
+        const roomHTML = document.getElementsByClassName("uk-list uk-list-divider")[0]
+        roomHTML.insertAdjacentHTML('beforeend', ReactDOMServer.renderToStaticMarkup(nEnrty))
+        document.getElementById("join-" + room).onclick = () => {
+            const addURL = "?room=" + room
+            window.location.href += addURL
+            socket.emit("joinRoom", user, room)
+        }
+    }
+
     useEffect(() => {
         room = queryString.parse(window.location.search).room
 
         socket = io("/") // http://localhost:4000/ or "/"
+        socket.emit("requestAllRoom")
 
         if (room) {
             socket.emit("joinRoom", user, room)
+            if (!document.getElementById("listcount-" + room)) {
+                createRoomEntry(room, { "me": 0 })
+            }
         }
 
         socket.on("playersInTheRoom", (pList) => {
@@ -557,33 +594,29 @@ const PlayRoom = () => {
             }
         })
 
-        socket.on("getAllRooms1", (rooms) => {
-            for (const [key, value] of Object.entries(rooms)) {
-                const li = document.createElement("li")
-                li.className = "cls:uk-animation-fade"
-                const div1 = document.createElement("div")
-                div1.className = "uk-grid uk-flex uk-flex-middle"
-                const div2 = document.createElement("div")
-                div2.className = "uk-text-lead"
-                div2.innerHTML = key
-                const div3 = document.createElement("div")
-                div3.className = "uk-width-expand"
-                const div4 = document.createElement("div")
-                div4.className = "uk-text-lead"
-                div4.innerHTML = value.length + "/4"
-                const div5 = document.createElement("div")
-                const button = document.createElement("button")
-                button.className = "uk-button uk-button-danger uk-width-small"
-                button.innerHTML = "Join"
-                li.appendChild(div1)
-                div1.appendChild(div2)
-                div1.appendChild(div3)
-                div1.appendChild(div4)
-                div1.appendChild(div5)
-                div5.appendChild(button)
-                const roomHTML = document.getElementsByClassName("uk-list uk-list-divider")[0]
-                roomHTML.appendChild(li)
+        socket.on("getAllRooms", (rooms) => {
+            for (const [room, people] of Object.entries(rooms)) {
+                createRoomEntry(room, people)
             }
+        })
+
+        socket.on("getAllRoomsNew", (rooms, room) => {
+            if (!document.getElementById("listcount-" + room)) {
+                createRoomEntry(room, rooms[room])
+            }
+        })
+
+        socket.on("getAllRoomsUpd", (rooms, room) => {
+            let sum = rooms[room] && Object.keys(rooms[room]).length !== 0 ? Object.values(rooms[room]).reduce((a, b) => a + b) : 0
+            let old = document.getElementById("listcount-" + room).innerHTML
+            let oldN = parseInt(old.split("/")[0])
+            totalOnlinePlayers += (sum - oldN)
+            document.getElementById("onlinePlayers").innerHTML = totalOnlinePlayers
+            document.getElementById("listcount-" + room).innerHTML = sum + "/4"
+        })
+
+        socket.on("getAllRoomsDeleted", (room) => {
+            document.getElementById("listhead-" + room).remove()
         })
 
         socket.on("getTile", (mTile, tName, sName, lName, tableMap, okey) => {
@@ -989,7 +1022,7 @@ const PlayRoom = () => {
                                     <div className="uk-grid uk-flex uk-flex-middle">
                                         <div className="uk-text-lead">
                                             Your Room
-                                            </div>
+                                        </div>
                                         <div className="uk-width-expand"> </div>
                                         <div className="uk-text-lead">
                                             0/4
@@ -1002,86 +1035,16 @@ const PlayRoom = () => {
                                                     const addURL = "?room=" + randomURL
                                                     window.location.href += addURL
                                                     socket.emit("joinRoom", user, randomURL)
-                                                }}
-                                            >
+                                                    createRoomEntry(randomURL, { "me": 0 })
+                                                }}>
                                                 Create
                                             </button>
                                         </div>
                                     </div>
                                 </li>
-                                <li uk-scrollspy="cls:uk-animation-fade">
-                                    <div className="uk-grid uk-flex uk-flex-middle">
-                                        <div className="uk-text-lead">
-                                            Room 1
-                                            </div>
-                                        <div className="uk-width-expand"> </div>
-                                        <div className="uk-text-lead">
-                                            1/4
-                                            </div>
-                                        <div>
-                                            <button className="uk-button uk-button-danger uk-width-small">Join</button>
-                                        </div>
-                                    </div>
-                                </li>
-                                <li uk-scrollspy="cls:uk-animation-fade">
-                                    <div className="uk-grid uk-flex uk-flex-middle">
-                                        <div className="uk-text-lead">
-                                            Room 1
-                                            </div>
-                                        <div className="uk-width-expand"> </div>
-                                        <div className="uk-text-lead">
-                                            1/4
-                                            </div>
-                                        <div>
-                                            <button className="uk-button uk-button-danger uk-width-small">Join</button>
-                                        </div>
-                                    </div>
-                                </li>
-                                <li uk-scrollspy="cls:uk-animation-fade">
-                                    <div className="uk-grid uk-flex uk-flex-middle">
-                                        <div className="uk-text-lead">
-                                            Room 1
-                                            </div>
-                                        <div className="uk-width-expand"> </div>
-                                        <div className="uk-text-lead">
-                                            1/4
-                                            </div>
-                                        <div>
-                                            <button className="uk-button uk-button-danger uk-width-small">Join</button>
-                                        </div>
-                                    </div>
-                                </li>
-                                <li uk-scrollspy="cls:uk-animation-fade">
-                                    <div className="uk-grid uk-flex uk-flex-middle">
-                                        <div className="uk-text-lead">
-                                            Room 1
-                                            </div>
-                                        <div className="uk-width-expand"> </div>
-                                        <div className="uk-text-lead">
-                                            1/4
-                                            </div>
-                                        <div>
-                                            <button className="uk-button uk-button-danger uk-width-small">Join</button>
-                                        </div>
-                                    </div>
-                                </li>
-                                <li uk-scrollspy="cls:uk-animation-fade">
-                                    <div className="uk-grid uk-flex uk-flex-middle">
-                                        <div className="uk-text-lead">
-                                            Room 1
-                                            </div>
-                                        <div className="uk-width-expand"> </div>
-                                        <div className="uk-text-lead">
-                                            1/4
-                                            </div>
-                                        <div>
-                                            <button className="uk-button uk-button-danger uk-width-small">Join</button>
-                                        </div>
-                                    </div>
-                                </li>
                             </ul>
 
-                            <div>Total Players: <span className="uk-label uk-label-warning">12431</span></div>
+                            <div>Total Players: <span className="uk-label uk-label-warning" id="onlinePlayers">1</span></div>
                         </li>
                         <li>
                             <input
@@ -1092,7 +1055,7 @@ const PlayRoom = () => {
                                 style={{ margin: "10px" }}>
                             </input>
                             <button
-                                className="uk-button uk-button-primary"
+                                className="uk-button uk-button-danger"
                                 id="readyButton"
                                 onClick={() => {
                                     playerName = document.getElementById("playerName").value
@@ -1101,7 +1064,7 @@ const PlayRoom = () => {
                                         return
                                     }
                                     var readyButton = document.getElementById("readyButton")
-                                    if (readyButton.innerHTML === "Ready") {
+                                    if (readyButton.innerHTML === "Ready ✖") {
                                         if (totalReadyPlayer < 4) {
                                             readyButton.style.backgroundColor = "rgb(89, 147, 97)"
                                             readyButton.style.cursor = "default"
@@ -1113,7 +1076,7 @@ const PlayRoom = () => {
                                         }
                                     }
                                 }}>
-                                Ready
+                                Ready ✖
                             </button>
 
                             <div className="uk-flex uk-flex-middle uk-flex-center">
