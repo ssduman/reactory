@@ -312,7 +312,7 @@ const PlayRoom = () => {
                 return
             }
             else if (e.target.id === "middle" && socket && myTurn) {
-                if (checkFinish() >= 0) {
+                if (checkFinish() >= 9) {
                     socket.emit("requestForOpenTable", room, playerName)
 
                     var number = s.innerHTML
@@ -330,7 +330,7 @@ const PlayRoom = () => {
 
                     var [row1number, row1color, row2number, row2color] = getMyTable()
                     socket.emit("myTable", row1number, row1color, row2number, row2color, mySocketName, room)
-                    socket.emit("leftRoom", mySocketName, room)
+                    setTimeout(() => socket.emit("leftRoom", mySocketName, room), 500)
 
                     totalReadyPlayer = 0
                     var readyButton = document.getElementById("readyButton")
@@ -798,11 +798,25 @@ const PlayRoom = () => {
             myTurn = true
             tileAllowed = false
 
-            var a = _.sample(allTiles, 15)
-            var b = _.sample(_.without(allTiles, ...a), 14)
-            var c = _.sample(_.without(_.without(allTiles, ...a), ...b), 14)
-            var d = _.sample(_.without(_.without(_.without(allTiles, ...a), ...b), ...c), 14)
-            var other = _.without(_.without(_.without(_.without(allTiles, ...a), ...b), ...c), ...d)
+            var okeyNumber = Math.floor(Math.random() * 13 + 1)
+            var colors = ["red", "#d6bc13", "blue", "black"]
+            var i = Math.floor(Math.random() * 4)
+            var okey = [okeyNumber, colors[i]]
+            okeyNumberColor = [okeyNumber, colors[i]]
+            var okeyTile = document.getElementsByClassName("okeyTile")
+            okeyTile["0"].innerHTML = okeyNumber
+            okeyTile["0"].style.color = colors[i]
+            var cObj = (colors[i] === "#d6bc13" ? "yellow" : colors[i]) + "-" + okeyNumber + "a"
+            var dObj = {}
+            dObj[cObj] = okeyNumber
+            
+            var remaining = _.without(allTiles, _.findWhere(allTiles, dObj))
+            
+            var a = _.sample(remaining, 15)
+            var b = _.sample(_.without(remaining, ...a), 14)
+            var c = _.sample(_.without(_.without(remaining, ...a), ...b), 14)
+            var d = _.sample(_.without(_.without(_.without(remaining, ...a), ...b), ...c), 14)
+            var other = _.without(_.without(_.without(_.without(remaining, ...a), ...b), ...c), ...d)
             const a_tile = a.map(e => Object.keys(e)[0])
             const b_tile = b.map(e => Object.keys(e)[0])
             const c_tile = c.map(e => Object.keys(e)[0])
@@ -833,15 +847,6 @@ const PlayRoom = () => {
                     entry.style.color = "black"
                 }
             })
-
-            var okeyNumber = Math.floor(Math.random() * 13 + 1)
-            var colors = ["red", "#d6bc13", "blue", "black"]
-            var i = Math.floor(Math.random() * 4)
-            var okey = [okeyNumber, colors[i]]
-            okeyNumberColor = [okeyNumber, colors[i]]
-            var okeyTile = document.getElementsByClassName("okeyTile")
-            okeyTile["0"].innerHTML = okeyNumber
-            okeyTile["0"].style.color = colors[i]
 
             var divRectD = document.getElementsByClassName("rectangleD")[0]
             divRectD.style.boxShadow = "0px 0px 5px 4px rgba(51,136,86,0.64)"
@@ -1036,7 +1041,7 @@ const PlayRoom = () => {
                 div.insertAdjacentHTML('beforeend', t)
             }
 
-            socket.emit("leftRoom", mySocketName, room)
+            setTimeout(() => socket.emit("leftRoom", mySocketName, room), 500)
 
             var readyButton = document.getElementById("readyButton")
             readyButton.innerHTML = "Ready ✖"
@@ -1272,9 +1277,29 @@ const PlayRoom = () => {
                                                         document.getElementsByClassName("rectangleD")[0].style.boxShadow = ""
                                                         document.getElementsByClassName("rectangleD")[1].style.boxShadow = ""
 
+                                                        document.getElementById("tableCell0").innerHTML = ""
+                                                        document.getElementById("tableCell0").style.color = "black"
+                                                        document.getElementById("tableCell3").innerHTML = ""
+                                                        document.getElementById("tableCell3").style.color = "black"
+                                                        document.getElementById("right").innerHTML = ""
+                                                        document.getElementById("right").style.color = "black"
+                                                        document.getElementById("left").innerHTML = ""
+                                                        document.getElementById("left").style.color = "black"
+                                                        document.getElementsByClassName("okeyTile")[0].style.color = "purple"
+                                                        document.getElementsByClassName("okeyTile")[0].innerHTML = ""
+                                                        document.getElementsByClassName("cell0")[0].style.color = "black"
+                                                        document.getElementsByClassName("cell1")[0].style.color = "black"
+                                                        document.getElementsByClassName("cell2")[0].style.color = "black"
+                                                        document.getElementsByClassName("cell3")[0].style.color = "black"
+
+                                                        myLeftTileStack = []
+
+                                                        document.getElementsByClassName("remainingTiles")[0].innerHTML = 48
+
                                                         for (let i = 1; i <= 28; i++) {
                                                             document.getElementById(i.toString()).innerHTML = ""
                                                             document.getElementById(i.toString()).style.color = "black"
+                                                            document.getElementById(i.toString()).style.transform = ""
                                                         }
 
                                                         if (document.getElementById("constructeda")) {
