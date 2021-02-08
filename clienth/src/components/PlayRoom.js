@@ -298,18 +298,31 @@ const PlayRoom = () => {
             else if (e.target.id === "right" && !myTurn) {
                 return
             }
-            else if (e.target.id === "middle" && socket) {
-                if (checkFinish() >= 9) {
+            else if (e.target.id === "middle" && socket && myTurn) {
+                if (checkFinish() >= 0) {
                     socket.emit("requestForOpenTable", room)
 
                     var [row1number, row1color, row2number, row2color] = getMyTable()
                     socket.emit("myTable", row1number, row1color, row2number, row2color, mySocketName, room)
+
+                    document.getElementById("readyButton").remove()
+                    document.getElementsByClassName("rectangleA")[0].style.border = "0px"
+                    document.getElementsByClassName("rectangleB")[0].style.border = "0px"
+                    document.getElementsByClassName("rectangleC")[0].style.border = "0px"
+                    document.getElementsByClassName("rectangleA")[0].style.top = "-100px"
+                    document.getElementsByClassName("rectangleB")[0].style.top = "-100px"
+                    document.getElementsByClassName("rectangleC")[0].style.top = "-100px"
                 }
                 else {
                     document.getElementById("perCount").innerHTML = "Per count is low!"
                 }
                 return
             }
+            else if (e.target.id === "middle" && socket && !myTurn) {
+                document.getElementById("perCount").innerHTML = "Not your turn"
+                return
+            }
+
             tempNumber = e.target.innerHTML
             tempColor = e.target.style.color
             tempTransform = e.target.style.transform
@@ -926,7 +939,7 @@ const PlayRoom = () => {
             var div = document.getElementsByClassName("okeyTable")[0]
             var t;
             if (sender === myLeftName) {
-                t = constructTable(row1number, row1color, row2number, row2color, "b", "rotate(270deg)", "100px", "-290px")
+                t = constructTable(row1number, row1color, row2number, row2color, "d", "rotate(270deg)", "100px", "-290px")
                 div.insertAdjacentHTML('beforeend', t)
             }
             else if (sender === myRightName) {
@@ -934,9 +947,26 @@ const PlayRoom = () => {
                 div.insertAdjacentHTML('beforeend', t)
             }
             else if (sender === myOppositeName) {
-                t = constructTable(row1number, row1color, row2number, row2color, "b", "rotate(0deg)", "-80px", "50px")
+                t = constructTable(row1number, row1color, row2number, row2color, "a", "rotate(0deg)", "-90px", "50px")
                 div.insertAdjacentHTML('beforeend', t)
             }
+
+            if (document.getElementById("readyButton")) {
+                document.getElementById("readyButton").remove()
+            }
+            document.getElementsByClassName("rectangleA")[0].style.border = "0px"
+            document.getElementsByClassName("rectangleB")[0].style.border = "0px"
+            document.getElementsByClassName("rectangleC")[0].style.border = "0px"
+
+            document.getElementsByClassName("rectangleA")[0].style.top = "-100px"
+            document.getElementsByClassName("rectangleB")[0].style.top = "-100px"
+            document.getElementsByClassName("rectangleC")[0].style.top = "-100px"
+
+            document.getElementsByClassName("rectangleA")[0].style.height = "510px"
+            document.getElementsByClassName("rectangleB")[0].style.height = "130px"
+            document.getElementsByClassName("rectangleC")[0].style.height = "510px"
+
+            document.getElementsByClassName("rectangleB")[0].style.width = "480px"
         })
 
         socket.on("messageSend", (from, message) => {
@@ -957,26 +987,26 @@ const PlayRoom = () => {
                         <li><a href="/#">Home</a></li>
                         <li><a href="/#">About</a></li>
                         <li><a href="/#">Blog</a></li>
+                        <li><a href="/#">Rooms</a></li>
                         <li><a href="/#">Okey</a></li>
-                        <li><a href="/#">Okey (ingame, debug)</a></li>
                         <li><a href="/#">Drawing Board</a></li>
                     </ul>
                 </div>
             </nav>
-            <main className="uk-background-default samd-border samd-rounded" uk-height-viewport="expand: true;">
+            <main className="uk-background-default samd-border samd-rounded test">
                 <div className="uk-padding">
                     <ul className="uk-switcher" id="pages">
-                        <li className="uk-animation-fade">
+                        <li className="uk-animation-fade" uk-height-viewport="expand: true;">
                             <h2>Hello, there.</h2>
                         </li>
-                        <li className="uk-animation-fade">
+                        <li className="uk-animation-fade" uk-height-viewport="expand: true;">
                             <h2>About</h2>
                             <p>Praesent turpis est, vestibulum at blandit at, sodales id lorem. Morbi hendrerit diam et vulputate vehicula. Aenean sollicitudin at enim nec dignissim. Ut mi tellus, consectetur at aliquet gravida, egestas at neque. Curabitur bibendum dui metus, quis egestas turpis tincidunt vitae. Donec vulputate dapibus justo, non facilisis felis bibendum non. Mauris non velit leo. Fusce maximus, tortor at aliquam rutrum, ante metus blandit enim, sed congue arcu tellus suscipit nunc. Donec sed rhoncus ipsum. Donec luctus ac ex in cursus. Curabitur malesuada id metus sit amet interdum. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis vitae sem in lectus suscipit blandit.</p>
                             <p>Duis pellentesque dolor vitae nisi pulvinar consequat. Pellentesque at velit ac quam fermentum ultricies et eu elit. Suspendisse faucibus auctor metus a sollicitudin. Vestibulum maximus interdum ipsum sed mattis. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc suscipit id augue eu auctor. Sed eget libero rhoncus, hendrerit risus non, semper quam. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aenean eu turpis et augue interdum gravida quis mattis leo. Proin ut rutrum diam. Proin fringilla, nulla vel consectetur sodales, augue nisl fermentum massa, ut dictum orci justo sit amet massa. Ut vel leo tincidunt, consequat eros non, mollis augue. Phasellus non libero consequat, consectetur elit sit amet, ultricies nisl. Nulla facilisi. Vivamus malesuada est at augue congue, eget molestie arcu pulvinar.</p>
                             <h2>Contact Me</h2>
                             <p>Praesent turpis est, vestibulum at blandit at, sodales id lorem. Morbi hendrerit diam et vulputate vehicula. Aenean sollicitudin at enim nec dignissim. Ut mi tellus, consectetur at aliquet gravida, egestas at neque. Curabitur bibendum dui metus, quis egestas turpis tincidunt vitae. Donec vulputate dapibus justo, non facilisis felis bibendum non. Mauris non velit leo. Fusce maximus, tortor at aliquam rutrum, ante metus blandit enim, sed congue arcu tellus suscipit nunc. Donec sed rhoncus ipsum. Donec luctus ac ex in cursus. Curabitur malesuada id metus sit amet interdum. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis vitae sem in lectus suscipit blandit.</p>
                         </li>
-                        <li className="uk-animation-fade">
+                        <li className="uk-animation-fade" uk-height-viewport="expand: true;">
                             <h2>Blog</h2>
                             <article>
                                 <h3 className="uk-margin-small"><a className="uk-link-reset" href="/#">Aliquam sodales dolor id vehicula aliquet</a></h3>
@@ -1029,48 +1059,49 @@ const PlayRoom = () => {
 
                             </article>
                         </li>
-                        <li className="uk-animation-fade">
-                            <h2>Okey</h2>
-                            <ul className="uk-list uk-list-divider">
-                                <li>
-                                    <div className="uk-grid uk-flex uk-flex-middle">
-                                        <div className="uk-text-lead">
-                                            Your Room
+                        <li className="uk-animation-fade" >
+                            <div class="" uk-height-viewport="expand: true;">
+                                <h2>Okey</h2>
+                                <ul className="uk-list uk-list-divider" uk-height-match=".test;">
+                                    <li uk-scrollspy="cls:uk-animation-fade">
+                                        <div className="uk-grid uk-flex uk-flex-middle">
+                                            <div className="uk-text-lead">
+                                                Your Room
                                         </div>
-                                        <div className="uk-width-expand"> </div>
-                                        <input
-                                            className="uk-input uk-form-width-small"
-                                            id="roomName"
-                                            type="text"
-                                            placeholder="name"
-                                            style={{ margin: "10px", paddingLeft: "10px" }}>
-                                        </input>
-                                        <div className="uk-text-lead">
-                                            0/4
+                                            <div className="uk-width-expand"> </div>
+                                            <input
+                                                className="uk-input uk-form-width-small"
+                                                id="roomName"
+                                                type="text"
+                                                placeholder="name"
+                                                style={{ margin: "10px", paddingLeft: "10px" }}>
+                                            </input>
+                                            <div className="uk-text-lead">
+                                                0/4
                                         </div>
-                                        <div>
-                                            <button
-                                                className="uk-button uk-button-primary uk-width-small"
-                                                onClick={() => {
-                                                    let roomName = document.getElementById("roomName").value
-                                                    if (!roomName) {
-                                                        alert("fill name")
-                                                        return
-                                                    }
-                                                    const randomURL = uuidv4().split("-")[0]
-                                                    const addURL = "?room=" + randomURL
-                                                    window.location.href += addURL
-                                                    socket.emit("joinRoom", user, randomURL, roomName)
-                                                    createRoomEntry(randomURL, { "me": 0 })
-                                                }}>
-                                                Create
+                                            <div>
+                                                <button
+                                                    className="uk-button uk-button-primary uk-width-small"
+                                                    onClick={() => {
+                                                        let roomName = document.getElementById("roomName").value
+                                                        if (!roomName) {
+                                                            alert("fill name")
+                                                            return
+                                                        }
+                                                        const randomURL = uuidv4().split("-")[0]
+                                                        const addURL = "?room=" + randomURL
+                                                        window.location.href += addURL
+                                                        socket.emit("joinRoom", user, randomURL, roomName)
+                                                        createRoomEntry(randomURL, { "me": 0 })
+                                                    }}>
+                                                    Create
                                             </button>
+                                            </div>
                                         </div>
-                                    </div>
-                                </li>
-                            </ul>
-
-                        <div className="uk-flex uk-flex-bottom" style={{ position: "absolute", bottom: "80px"}}>Total Players: <span className="uk-label uk-label-warning" id="onlinePlayers"> 1</span></div>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div className="uk-flex uk-flex-bottom" >Total Players: <span className="uk-label uk-label-warning" id="onlinePlayers"> 1</span></div>
                         </li>
                         <li className="uk-animation-fade">
                             <input
@@ -1442,7 +1473,9 @@ const PlayRoom = () => {
                             <span id="perCount" style={{ marginLeft: "4px" }}>Total per: </span>
                         </li>
                         <li className="uk-animation-fade">
-                            <h2>Drawing Board</h2>
+                            <div class="" uk-height-viewport="expand: true;">
+                                <h2>Drawing Board</h2>
+                            </div>
                         </li>
                     </ul>
                 </div>
