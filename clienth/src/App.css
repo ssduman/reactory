@@ -87,6 +87,16 @@
   font-size: 18px;
 }
 
+.playerInput {
+  top: 0px;
+  left: -250px;
+  position: absolute;
+  text-align: center;
+  font-weight: bold;
+  border: 0px !important;
+  font-size: 12px !important;
+}
+
 .cell0 {
   width: 30px;
   height: 50px;
@@ -226,4 +236,28 @@ textarea {
   font-size: 12px;
   color: brown;
   font-weight: 500;
+}
+
+.pointTable {
+  font-size: 12px !important;
+  font-weight: normal !important;
+  margin-top: 4px !important;
+}
+
+.pointTable
+td {
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px !important;
+  font-weight: normal !important;
+  margin-top: 4px !important;
+}
+
+.gostergeBtn {
+  top: 400px;
+  left: 640px;
+  position: absolute;
+  display: none;
 }

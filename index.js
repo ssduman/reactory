@@ -50,7 +50,9 @@ io.on("connection", (socket) => {
         io.to(socket.id).emit("getAllRooms", allRooms, roomNameMap)
     })
 
-    socket.on("left", (name) => {
+    socket.on("leftRoom", (name, room) => {
+        socket.leave(room)
+        // socket.to(room).emit("userDisconnected", socket.id)
     })
 
     socket.on("messageSend", (from, message, room) => {
@@ -158,12 +160,16 @@ io.on("connection", (socket) => {
         socket.broadcast.emit("leftChanged", client, number, color)
     })
 
-    socket.on("requestForOpenTable", (room) => {
-        socket.to(room).emit("sendTable")
+    socket.on("requestForOpenTable", (room, pName) => {
+        socket.to(room).emit("sendTable", pName)
     })
 
     socket.on("myTable", (r1n, r1c, r2n, r2c, name, room) => {
         socket.to(room).emit("openTables", r1n, r1c, r2n, r2c, name)
+    })
+
+    socket.on("gosterge", (room, pName) => {
+        socket.to(room).emit("decreaseGosterge", pName)
     })
 
     socket.on('disconnect', () => {

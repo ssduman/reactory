@@ -1,7 +1,7 @@
 import React from 'react'
-import { useState, useEffect } from "react"
+import { useEffect } from "react"
 import ReactDOMServer from 'react-dom/server'
-import _, { create } from 'underscore'
+import _ from 'underscore'
 import queryString from 'query-string'
 import { io } from "socket.io-client"
 import { v4 as uuidv4 } from 'uuid'
@@ -136,6 +136,7 @@ var myOppositePlayerName;
 var okeyNumberColor;
 var myTurn = false
 var tileAllowed = false
+var gostergeAllowed = true
 var myLeftTileStack = []
 var totalPerCount;
 var totalReadyPlayer = 0
@@ -177,6 +178,10 @@ const PlayRoom = () => {
                 else {
                     s.innerHTML = myLeftTileStack[myLeftTileStack.length - 1][0]
                     s.style.color = myLeftTileStack[myLeftTileStack.length - 1][1]
+                }
+
+                if (document.getElementById("gostergeButton")) {
+                    document.getElementById("gostergeButton").style.display = "none"
                 }
 
                 socket.emit("myLeftChanged", mySocketName, myLeaderName, s.innerHTML, s.style.color)
@@ -239,6 +244,10 @@ const PlayRoom = () => {
                     e.target.src = s.src
                 })
 
+                if (document.getElementById("gostergeButton")) {
+                    document.getElementById("gostergeButton").style.display = "none"
+                }
+
                 tileAllowed = false
             }
         }
@@ -288,6 +297,10 @@ const PlayRoom = () => {
 
                     myTurn = false
 
+                    if (document.getElementById("gostergeButton")) {
+                        document.getElementById("gostergeButton").style.display = "none"
+                    }
+
                     socket.emit("nextTurn", myRightName)
                     return
                 }
@@ -300,12 +313,38 @@ const PlayRoom = () => {
             }
             else if (e.target.id === "middle" && socket && myTurn) {
                 if (checkFinish() >= 0) {
-                    socket.emit("requestForOpenTable", room)
+                    socket.emit("requestForOpenTable", room, playerName)
+
+                    var number = s.innerHTML
+                    var color = s.style.color
+                    if (color === "rgb(214, 188, 19)") {
+                        color = "#d6bc13"
+                    }
+                    let point = 4
+                    if (parseInt(number) === parseInt(okeyNumberColor[0]) + 1 && color === okeyNumberColor[1]) {
+                        point *= 2
+                    }
+
+                    let myPoint = document.getElementById("pPoint-" + playerName)
+                    document.getElementById("pPoint-" + playerName).innerHTML = parseInt(myPoint.innerHTML) - point
 
                     var [row1number, row1color, row2number, row2color] = getMyTable()
                     socket.emit("myTable", row1number, row1color, row2number, row2color, mySocketName, room)
+                    socket.emit("leftRoom", mySocketName, room)
 
-                    document.getElementById("readyButton").remove()
+                    totalReadyPlayer = 0
+                    var readyButton = document.getElementById("readyButton")
+                    readyButton.innerHTML = "Ready ✖"
+                    readyButton.style.backgroundColor = ""
+                    readyButton.style.cursor = "pointer"
+
+                    document.getElementById("readyPlayerDiv").innerHTML = "Ready Players: " + totalReadyPlayer + "/4"
+                    document.getElementById("readyPlayerDiv1").innerHTML = ""
+                    document.getElementById("readyPlayerDiv2").innerHTML = ""
+                    document.getElementById("readyPlayerDiv3").innerHTML = ""
+                    document.getElementById("readyPlayerDiv4").innerHTML = ""
+
+                    // document.getElementById("readyButton").remove()
                     document.getElementsByClassName("rectangleA")[0].style.border = "0px"
                     document.getElementsByClassName("rectangleB")[0].style.border = "0px"
                     document.getElementsByClassName("rectangleC")[0].style.border = "0px"
@@ -487,6 +526,7 @@ const PlayRoom = () => {
         const t =
             <table
                 className="uk-table uk-table-small uk-table-middle .uk-width-20 myTable1"
+                id={"constructed" + order}
                 style={{
                     transform: rotate,
                     width: "80%",
@@ -562,6 +602,27 @@ const PlayRoom = () => {
         }
     }
 
+    const gosterge = () => {
+        for (let i = 1; i <= 28; i++) {
+            let cell = document.getElementById(i.toString())
+            if (cell.innerHTML && parseInt(cell.innerHTML) === parseInt(okeyNumberColor[0])) {
+                let color = cell.style.color
+                if (color === "rgb(214, 188, 19)") {
+                    color = "#d6bc13"
+                }
+                if (color === okeyNumberColor[1]) {
+                    socket.emit("gosterge", room, playerName)
+
+                    let myPoint = document.getElementById("pPoint-" + playerName)
+                    document.getElementById("pPoint-" + playerName).innerHTML = parseInt(myPoint.innerHTML) - 2
+                }
+            }
+        }
+        if (document.getElementById("gostergeButton")) {
+            document.getElementById("gostergeButton").style.display = "none"
+        }
+    }
+
     useEffect(() => {
         room = queryString.parse(window.location.search).room
 
@@ -580,10 +641,23 @@ const PlayRoom = () => {
                 return
             }
             totalReadyPlayer = pList.length
-            totalReadyPlayerName = pList
+            const tableHTML = document.getElementById("pointTablePlayer")
+            if (totalReadyPlayerName.length < pList.length) {
+                totalReadyPlayerName = pList
+                tableHTML.innerHTML = ""
+            }
             document.getElementById("readyPlayerDiv").innerHTML = "Ready Players: " + totalReadyPlayer + "/4"
             for (let i = 0; i < pList.length; i++) {
-                document.getElementById("readyPlayerDiv" + (i + 1)).innerHTML = totalReadyPlayerName[i]
+                document.getElementById("readyPlayerDiv" + (i + 1)).innerHTML = pList[i]
+                if (document.getElementById("pPoint-" + totalReadyPlayerName[i])) {
+                    continue
+                }
+                let nPlayerPoint =
+                    <tr>
+                        <td>{totalReadyPlayerName[i]}</td>
+                        <td id={"pPoint-" + totalReadyPlayerName[i]}>20</td>
+                    </tr>
+                tableHTML.insertAdjacentHTML('beforeend', ReactDOMServer.renderToStaticMarkup(nPlayerPoint))
             }
         })
 
@@ -699,6 +773,10 @@ const PlayRoom = () => {
                     entry.style.color = "black"
                 }
             })
+
+            if (document.getElementById("gostergeButton")) {
+                document.getElementById("gostergeButton").style.display = "block"
+            }
         })
 
         socket.on("leader", (otherClients, room, sName, tableMap) => {
@@ -771,6 +849,10 @@ const PlayRoom = () => {
             divRectD = document.getElementsByClassName("rectangleD")[1]
             divRectD.style.boxShadow = "0px 0px 5px 4px rgba(51,136,86,0.64)"
             divRectD.style.color = "rgba(51,136,86,0.64)"
+
+            if (document.getElementById("gostergeButton")) {
+                document.getElementById("gostergeButton").style.display = "block"
+            }
 
             socket.emit("tilesReady", otherClients, room, [b_tile, c_tile, d_tile], sName, tableMap, okey)
         })
@@ -930,7 +1012,10 @@ const PlayRoom = () => {
             currTableTiles.innerHTML = parseInt(currTableTiles.innerHTML) - 1
         })
 
-        socket.on("sendTable", () => {
+        socket.on("sendTable", (pName) => {
+            let itsPoint = document.getElementById("pPoint-" + pName)
+            document.getElementById("pPoint-" + pName).innerHTML = parseInt(itsPoint.innerHTML) - 4
+
             var [row1number, row1color, row2number, row2color] = getMyTable()
             socket.emit("myTable", row1number, row1color, row2number, row2color, mySocketName, room)
         })
@@ -951,9 +1036,23 @@ const PlayRoom = () => {
                 div.insertAdjacentHTML('beforeend', t)
             }
 
-            if (document.getElementById("readyButton")) {
-                document.getElementById("readyButton").remove()
-            }
+            socket.emit("leftRoom", mySocketName, room)
+
+            var readyButton = document.getElementById("readyButton")
+            readyButton.innerHTML = "Ready ✖"
+            readyButton.style.backgroundColor = ""
+            readyButton.style.cursor = "pointer"
+
+            totalReadyPlayer = 0
+            document.getElementById("readyPlayerDiv").innerHTML = "Ready Players: " + totalReadyPlayer + "/4"
+            document.getElementById("readyPlayerDiv1").innerHTML = ""
+            document.getElementById("readyPlayerDiv2").innerHTML = ""
+            document.getElementById("readyPlayerDiv3").innerHTML = ""
+            document.getElementById("readyPlayerDiv4").innerHTML = ""
+
+            // if (document.getElementById("readyButton")) {
+            //     document.getElementById("readyButton").remove()
+            // }
             document.getElementsByClassName("rectangleA")[0].style.border = "0px"
             document.getElementsByClassName("rectangleB")[0].style.border = "0px"
             document.getElementsByClassName("rectangleC")[0].style.border = "0px"
@@ -967,6 +1066,11 @@ const PlayRoom = () => {
             document.getElementsByClassName("rectangleC")[0].style.height = "510px"
 
             document.getElementsByClassName("rectangleB")[0].style.width = "480px"
+        })
+
+        socket.on("decreaseGosterge", (pName) => {
+            let itsPoint = document.getElementById("pPoint-" + pName)
+            document.getElementById("pPoint-" + pName).innerHTML = parseInt(itsPoint.innerHTML) - 2
         })
 
         socket.on("messageSend", (from, message) => {
@@ -1060,7 +1164,7 @@ const PlayRoom = () => {
                             </article>
                         </li>
                         <li className="uk-animation-fade" >
-                            <div class="" uk-height-viewport="expand: true;">
+                            <div className="" uk-height-viewport="expand: true;">
                                 <h2>Okey</h2>
                                 <ul className="uk-list uk-list-divider" uk-height-match=".test;">
                                     <li uk-scrollspy="cls:uk-animation-fade">
@@ -1111,33 +1215,98 @@ const PlayRoom = () => {
                                 placeholder="name"
                                 style={{ margin: "10px" }}>
                             </input>
-                            <button
-                                className="uk-button uk-button-danger"
-                                id="readyButton"
-                                onClick={() => {
-                                    playerName = document.getElementById("playerName").value
-                                    if (!playerName) {
-                                        alert("fill name")
-                                        return
-                                    }
-                                    var readyButton = document.getElementById("readyButton")
-                                    if (readyButton.innerHTML === "Ready ✖") {
-                                        if (totalReadyPlayer < 4) {
-                                            readyButton.style.backgroundColor = "rgb(89, 147, 97)"
-                                            readyButton.style.cursor = "default"
-                                            readyButton.innerHTML = "Ready ✓"
-                                            totalReadyPlayer += 1
-                                            document.getElementById("readyPlayerDiv").innerHTML = "Ready Players: " + totalReadyPlayer + "/4"
-                                            document.getElementById("readyPlayerDiv" + totalReadyPlayer).innerHTML = playerName
-                                            socket.emit("imready", user, room, playerName)
-                                        }
-                                    }
-                                }}>
-                                Ready ✖
-                            </button>
 
                             <div className="uk-flex uk-flex-middle uk-flex-center">
                                 <div className="okeyTable">
+                                    <div className="playerInput">
+                                        <button
+                                            className="uk-button uk-button-danger"
+                                            id="readyButton"
+                                            onClick={() => {
+                                                playerName = document.getElementById("playerName").value
+                                                if (!playerName) {
+                                                    alert("fill name")
+                                                    return
+                                                }
+                                                var readyButton = document.getElementById("readyButton")
+                                                if (readyButton.innerHTML === "Ready ✖") {
+                                                    document.getElementById("playerName").disabled = true
+                                                    if (totalReadyPlayer < 4) {
+                                                        readyButton.style.backgroundColor = "rgb(89, 147, 97)"
+                                                        readyButton.style.cursor = "default"
+                                                        readyButton.innerHTML = "Ready ✓"
+                                                        totalReadyPlayer += 1
+                                                        document.getElementById("readyPlayerDiv").innerHTML = "Ready Players: " + totalReadyPlayer + "/4"
+                                                        document.getElementById("readyPlayerDiv" + totalReadyPlayer).innerHTML = playerName
+                                                        socket.emit("imready", user, room, playerName)
+                                                        if (!document.getElementById("pPoint-" + playerName)) {
+                                                            const nPlayerPoint =
+                                                                <tr>
+                                                                    <td>{playerName}</td>
+                                                                    <td id={"pPoint-" + playerName}>20</td>
+                                                                </tr>
+                                                            const tableHTML = document.getElementById("pointTablePlayer")
+                                                            tableHTML.insertAdjacentHTML('beforeend', ReactDOMServer.renderToStaticMarkup(nPlayerPoint))
+                                                        }
+
+                                                        document.getElementsByClassName("rectangleA")[0].style.border = "1px solid black"
+                                                        document.getElementsByClassName("rectangleB")[0].style.border = "1px solid black"
+                                                        document.getElementsByClassName("rectangleC")[0].style.border = "1px solid black"
+
+                                                        document.getElementsByClassName("rectangleA")[0].style.top = "50px"
+                                                        document.getElementsByClassName("rectangleB")[0].style.top = "-60px"
+                                                        document.getElementsByClassName("rectangleC")[0].style.top = "50px"
+
+                                                        document.getElementsByClassName("rectangleA")[0].style.height = "250px"
+                                                        document.getElementsByClassName("rectangleB")[0].style.height = "130px"
+                                                        document.getElementsByClassName("rectangleC")[0].style.height = "250px"
+
+                                                        document.getElementsByClassName("rectangleB")[0].style.width = "500px"
+
+                                                        document.getElementsByClassName("rectangleA")[0].style.boxShadow = ""
+                                                        document.getElementsByClassName("rectangleB")[0].style.boxShadow = ""
+                                                        document.getElementsByClassName("rectangleC")[0].style.boxShadow = ""
+                                                        document.getElementsByClassName("rectangleA")[0].style.color = "black"
+                                                        document.getElementsByClassName("rectangleB")[0].style.color = "black"
+                                                        document.getElementsByClassName("rectangleC")[0].style.color = "black"
+                                                        document.getElementsByClassName("rectangleD")[0].style.boxShadow = ""
+                                                        document.getElementsByClassName("rectangleD")[1].style.boxShadow = ""
+
+                                                        for (let i = 1; i <= 28; i++) {
+                                                            document.getElementById(i.toString()).innerHTML = ""
+                                                            document.getElementById(i.toString()).style.color = "black"
+                                                        }
+
+                                                        if (document.getElementById("constructeda")) {
+                                                            document.getElementById("constructeda").remove()
+                                                        }
+                                                        if (document.getElementById("constructedb")) {
+                                                            document.getElementById("constructedb").remove()
+                                                        }
+                                                        if (document.getElementById("constructedc")) {
+                                                            document.getElementById("constructedc").remove()
+                                                        }
+                                                        if (document.getElementById("constructedd")) {
+                                                            document.getElementById("constructedd").remove()
+                                                        }
+                                                    }
+                                                }
+                                            }}>
+                                            Ready ✖
+                                        </button>
+                                        <div className="pointTable">
+                                            <table>
+                                                <thead>
+                                                    <tr>
+                                                        <th>Player</th>
+                                                        <th>Point</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="pointTablePlayer">
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
 
                                     <div className="cell0" style={{ color: "black" }}></div>
                                     <div className="cell1" style={{ color: "black" }}></div>
@@ -1147,7 +1316,7 @@ const PlayRoom = () => {
                                     <div className="okeyTile" style={{ color: "purple" }}>
                                     </div>
                                     <div className="remainingTiles">
-                                        49
+                                        48
                                     </div>
 
                                     <div className="rectangleA"></div>
@@ -1462,6 +1631,13 @@ const PlayRoom = () => {
                                         <div id="readyPlayerDiv3"></div>
                                         <div id="readyPlayerDiv4"></div>
                                     </div>
+
+                                    <button className="uk-button uk-button-primary gostergeBtn"
+                                        id="gostergeButton"
+                                        onClick={() => { gosterge() }}>
+                                        Gösterge
+                                    </button>
+
                                 </div>
                             </div>
 
@@ -1473,7 +1649,7 @@ const PlayRoom = () => {
                             <span id="perCount" style={{ marginLeft: "4px" }}>Total per: </span>
                         </li>
                         <li className="uk-animation-fade">
-                            <div class="" uk-height-viewport="expand: true;">
+                            <div className="" uk-height-viewport="expand: true;">
                                 <h2>Drawing Board</h2>
                             </div>
                         </li>
