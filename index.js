@@ -160,8 +160,8 @@ io.on("connection", (socket) => {
         socket.broadcast.emit("leftChanged", client, number, color)
     })
 
-    socket.on("requestForOpenTable", (room, pName) => {
-        socket.to(room).emit("sendTable", pName)
+    socket.on("requestForOpenTable", (room, pName, point) => {
+        socket.to(room).emit("sendTable", pName, point)
     })
 
     socket.on("myTable", (r1n, r1c, r2n, r2c, name, room) => {

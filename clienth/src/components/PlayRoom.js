@@ -6,9 +6,9 @@ import queryString from 'query-string'
 import { io } from "socket.io-client"
 import { v4 as uuidv4 } from 'uuid'
 import Chat from "./Chat.js"
-import "../../node_modules/uikit/dist/js/uikit.min.js"
-import "../../node_modules/uikit/dist/js/uikit-icons.min.js"
-import "../../node_modules/uikit/dist/css/uikit.min.css"
+// import "../../node_modules/uikit/dist/js/uikit.min.js"
+// import "../../node_modules/uikit/dist/js/uikit-icons.min.js"
+// import "../../node_modules/uikit/dist/css/uikit.min.css"
 import '../App.css'
 
 const allTiles = [
@@ -312,25 +312,26 @@ const PlayRoom = () => {
                 return
             }
             else if (e.target.id === "middle" && socket && myTurn) {
-                if (checkFinish() >= 9) {
-                    socket.emit("requestForOpenTable", room, playerName)
-
+                if (checkFinish() >= 0) {
+                    
                     var number = s.innerHTML
                     var color = s.style.color
                     if (color === "rgb(214, 188, 19)") {
                         color = "#d6bc13"
                     }
                     let point = 4
-                    if (parseInt(number) === parseInt(okeyNumberColor[0]) + 1 && color === okeyNumberColor[1]) {
+                    let oN = parseInt(okeyNumberColor[0]) + 1 === 14 ? 1 : parseInt(okeyNumberColor[0]) + 1
+                    if (parseInt(number) === oN && color === okeyNumberColor[1]) {
                         point *= 2
                     }
+                    socket.emit("requestForOpenTable", room, playerName, point)
 
                     let myPoint = document.getElementById("pPoint-" + playerName)
                     document.getElementById("pPoint-" + playerName).innerHTML = parseInt(myPoint.innerHTML) - point
 
                     var [row1number, row1color, row2number, row2color] = getMyTable()
                     socket.emit("myTable", row1number, row1color, row2number, row2color, mySocketName, room)
-                    setTimeout(() => socket.emit("leftRoom", mySocketName, room), 500)
+                    setTimeout(() => socket.emit("leftRoom", mySocketName, room), 1000)
 
                     totalReadyPlayer = 0
                     var readyButton = document.getElementById("readyButton")
@@ -642,9 +643,19 @@ const PlayRoom = () => {
             }
             totalReadyPlayer = pList.length
             const tableHTML = document.getElementById("pointTablePlayer")
-            if (totalReadyPlayerName.length < pList.length) {
+            let flag = false
+            for (let i = 0; i < pList.length; i++) {
+                if (document.getElementById("pPoint-" + totalReadyPlayerName[i])) {
+                    continue
+                }
+                else {
+                    flag = true
+                }
+            }
+            if (flag) {
                 totalReadyPlayerName = pList
                 tableHTML.innerHTML = ""
+                console.log("delete inner")
             }
             document.getElementById("readyPlayerDiv").innerHTML = "Ready Players: " + totalReadyPlayer + "/4"
             for (let i = 0; i < pList.length; i++) {
@@ -662,6 +673,7 @@ const PlayRoom = () => {
         })
 
         socket.on("userDisconnected", (socketid) => {
+            console.log("user disconnected")
             if (socketid === myLeftName) {
                 totalReadyPlayer -= 1
                 document.getElementById("readyPlayerDiv").innerHTML = "Ready Players: " + totalReadyPlayer + "/4"
@@ -1017,9 +1029,9 @@ const PlayRoom = () => {
             currTableTiles.innerHTML = parseInt(currTableTiles.innerHTML) - 1
         })
 
-        socket.on("sendTable", (pName) => {
+        socket.on("sendTable", (pName, point) => {
             let itsPoint = document.getElementById("pPoint-" + pName)
-            document.getElementById("pPoint-" + pName).innerHTML = parseInt(itsPoint.innerHTML) - 4
+            document.getElementById("pPoint-" + pName).innerHTML = parseInt(itsPoint.innerHTML) - parseInt(point)
 
             var [row1number, row1color, row2number, row2color] = getMyTable()
             socket.emit("myTable", row1number, row1color, row2number, row2color, mySocketName, room)
@@ -1041,7 +1053,7 @@ const PlayRoom = () => {
                 div.insertAdjacentHTML('beforeend', t)
             }
 
-            setTimeout(() => socket.emit("leftRoom", mySocketName, room), 500)
+            setTimeout(() => socket.emit("leftRoom", mySocketName, room), 1000)
 
             var readyButton = document.getElementById("readyButton")
             readyButton.innerHTML = "Ready ✖"
