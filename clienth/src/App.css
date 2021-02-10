@@ -261,3 +261,10 @@ td {
   position: absolute;
   display: none;
 }
+
+.roomName {
+  top: 160px;
+  left: 210px;
+  position: absolute;
+  font-size: 18px !important;
+}

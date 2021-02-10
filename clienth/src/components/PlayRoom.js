@@ -136,7 +136,7 @@ var myOppositePlayerName;
 var okeyNumberColor;
 var myTurn = false
 var tileAllowed = false
-var gostergeAllowed = true
+var playerPointMap = {}
 var myLeftTileStack = []
 var totalPerCount;
 var totalReadyPlayer = 0
@@ -312,8 +312,8 @@ const PlayRoom = () => {
                 return
             }
             else if (e.target.id === "middle" && socket && myTurn) {
-                if (checkFinish() >= 0) {
-                    
+                if (checkFinish() >= 9) {
+
                     var number = s.innerHTML
                     var color = s.style.color
                     if (color === "rgb(214, 188, 19)") {
@@ -637,43 +637,41 @@ const PlayRoom = () => {
             }
         }
 
-        socket.on("playersInTheRoom", (pList) => {
+        socket.on("playersInTheRoom", (pList, rName) => {
+            if (rName) {
+                document.getElementsByClassName("roomName")[0].innerHTML = "Room name: " + rName
+            }
             if (pList.length > 4) {
                 return
             }
+            totalReadyPlayerName = pList
             totalReadyPlayer = pList.length
-            const tableHTML = document.getElementById("pointTablePlayer")
-            let flag = false
-            for (let i = 0; i < pList.length; i++) {
-                if (document.getElementById("pPoint-" + totalReadyPlayerName[i])) {
-                    continue
-                }
-                else {
-                    flag = true
-                }
-            }
-            if (flag) {
-                totalReadyPlayerName = pList
-                tableHTML.innerHTML = ""
-                console.log("delete inner")
-            }
             document.getElementById("readyPlayerDiv").innerHTML = "Ready Players: " + totalReadyPlayer + "/4"
+            const tableHTML = document.getElementById("pointTablePlayer")
             for (let i = 0; i < pList.length; i++) {
-                document.getElementById("readyPlayerDiv" + (i + 1)).innerHTML = pList[i]
-                if (document.getElementById("pPoint-" + totalReadyPlayerName[i])) {
-                    continue
+                if (!(pList[i] in playerPointMap)) {
+                    playerPointMap[pList[i]] = 20
+
+                    document.getElementById("readyPlayerDiv" + (i + 1)).innerHTML = pList[i]
+                    let nPlayerPoint =
+                        <tr>
+                            <td>{totalReadyPlayerName[i]}</td>
+                            <td id={"pPoint-" + totalReadyPlayerName[i]}>20</td>
+                        </tr>
+                    tableHTML.insertAdjacentHTML('beforeend', ReactDOMServer.renderToStaticMarkup(nPlayerPoint))
                 }
-                let nPlayerPoint =
-                    <tr>
-                        <td>{totalReadyPlayerName[i]}</td>
-                        <td id={"pPoint-" + totalReadyPlayerName[i]}>20</td>
-                    </tr>
-                tableHTML.insertAdjacentHTML('beforeend', ReactDOMServer.renderToStaticMarkup(nPlayerPoint))
+
+                document.getElementById("readyPlayerDiv" + (i + 1)).innerHTML = pList[i]
+            }
+        })
+
+        socket.on("getRoomName", (rName) => {
+            if (rName) {
+                document.getElementsByClassName("roomName")[0].innerHTML = "Room name: " + rName
             }
         })
 
         socket.on("userDisconnected", (socketid) => {
-            console.log("user disconnected")
             if (socketid === myLeftName) {
                 totalReadyPlayer -= 1
                 document.getElementById("readyPlayerDiv").innerHTML = "Ready Players: " + totalReadyPlayer + "/4"
@@ -821,9 +819,9 @@ const PlayRoom = () => {
             var cObj = (colors[i] === "#d6bc13" ? "yellow" : colors[i]) + "-" + okeyNumber + "a"
             var dObj = {}
             dObj[cObj] = okeyNumber
-            
+
             var remaining = _.without(allTiles, _.findWhere(allTiles, dObj))
-            
+
             var a = _.sample(remaining, 15)
             var b = _.sample(_.without(remaining, ...a), 14)
             var c = _.sample(_.without(_.without(remaining, ...a), ...b), 14)
@@ -1214,6 +1212,7 @@ const PlayRoom = () => {
                                                         window.location.href += addURL
                                                         socket.emit("joinRoom", user, randomURL, roomName)
                                                         createRoomEntry(randomURL, { "me": 0 })
+                                                        setTimeout(document.getElementsByClassName("roomName")[0].innerHTML = "Room name: " + roomName, 300)
                                                     }}>
                                                     Create
                                             </button>
@@ -1225,6 +1224,8 @@ const PlayRoom = () => {
                             <div className="uk-flex uk-flex-bottom" >Total Players: <span className="uk-label uk-label-warning" id="onlinePlayers"> 1</span></div>
                         </li>
                         <li className="uk-animation-fade">
+                            <div className="roomName">Room name: </div>
+
                             <input
                                 className="uk-input uk-form-width-small"
                                 id="playerName"
@@ -1256,15 +1257,6 @@ const PlayRoom = () => {
                                                         document.getElementById("readyPlayerDiv").innerHTML = "Ready Players: " + totalReadyPlayer + "/4"
                                                         document.getElementById("readyPlayerDiv" + totalReadyPlayer).innerHTML = playerName
                                                         socket.emit("imready", user, room, playerName)
-                                                        if (!document.getElementById("pPoint-" + playerName)) {
-                                                            const nPlayerPoint =
-                                                                <tr>
-                                                                    <td>{playerName}</td>
-                                                                    <td id={"pPoint-" + playerName}>20</td>
-                                                                </tr>
-                                                            const tableHTML = document.getElementById("pointTablePlayer")
-                                                            tableHTML.insertAdjacentHTML('beforeend', ReactDOMServer.renderToStaticMarkup(nPlayerPoint))
-                                                        }
 
                                                         document.getElementsByClassName("rectangleA")[0].style.border = "1px solid black"
                                                         document.getElementsByClassName("rectangleB")[0].style.border = "1px solid black"

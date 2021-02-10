@@ -33,6 +33,7 @@ io.on("connection", (socket) => {
         }
         socket.broadcast.emit("getAllRoomsNew", allRooms, room, roomNameMap[room])
 
+        socket.emit("getRoomName", roomNameMap[room])
         let clients = io.sockets.adapter.rooms.get(room)
         let numClients = clients ? clients.size : 0
 
@@ -42,7 +43,7 @@ io.on("connection", (socket) => {
             for (let i = 0; i < numClients; i++) {
                 pList.push(io.sockets.sockets.get(allC[i]).playerName)
             }
-            socket.emit("playersInTheRoom", pList)
+            socket.emit("playersInTheRoom", pList, roomNameMap[room])
         }
     })
 
@@ -81,7 +82,7 @@ io.on("connection", (socket) => {
         for (let i = 0; i < numClients; i++) {
             pList.push(io.sockets.sockets.get(allC[i]).playerName)
         }
-        socket.to(room + "temp").emit("playersInTheRoom", pList)
+        io.to(room + "temp").emit("playersInTheRoom", pList)
 
         if (numClients === 4) {
             let others = Array.from(clients)
