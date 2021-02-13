@@ -16,7 +16,6 @@ const io = socket(server, {
 
 const bodyParser = require("body-parser")
 const cors = require('cors')
-const mysql = require('mysql')
 const bcrypt = require('bcrypt')
 const session = require('express-session')
 const cookieParser = require('cookie-parser')
@@ -31,18 +30,22 @@ app.use(cookieParser())
 app.use(session({
     resave: false,
     saveUninitialized: false,
-    secret: 'Usq23A1d8Fyy'
+    secret: process.env.SESSION_SECRET
 }));
 
-const Pool = require("pg").Pool
-
-const pool = new Pool({
-    user: process.env.PG_USER,
-    password: process.env.PG_PASS,
-    host: process.env.PG_HOST,
-    port: 5432,
-    database: process.env.PG_DB_NAME
+const { Pool, Client } = require('pg')
+// const config = {
+//     user: process.env.PGUSER,
+//     password: process.env.PGPASSWORD,
+//     host: process.env.PGHOST,
+//     port: process.env.PGPORT,
+//     database: process.env.PGDATABASE
+// }
+// const pool = new Pool()
+const client = new Client({
+    connectionString: process.env.DATABASE_URL,
 })
+client.connect()
 
 // const connection = mysql.createConnection({
 //     host: process.env.DB_HOST,
@@ -51,7 +54,6 @@ const pool = new Pool({
 //     database: process.env.DB_NAME
 // })
 // connection.connect()
-
 // const sqlQuery = (query, callback) => {
 //     connection.query(query, (error, results, fields) => {
 //         if (error) {
@@ -273,7 +275,7 @@ app.post('/api/login', async (req, res, next) => {
     const email = req.body.email
     const password = req.body.password
 
-    const queryResult = await pool.query("SELECT * FROM users WHERE name = ($1)", [name])
+    const queryResult = await client.query("SELECT * FROM users WHERE name = ($1)", [name])
     results = queryResult["rows"]
     console.log("queryResult:", results)
     if (!results || results === [] || results.length === 0) {
@@ -316,12 +318,12 @@ app.post('/api/signin', async (req, res) => {
     try {
         const hash = await bcrypt.hash(password, 10)
 
-        const chechUserExists = await pool.query("SELECT * FROM users WHERE name = ($1)", [name])
+        const chechUserExists = await client.query("SELECT * FROM users WHERE name = ($1)", [name])
         if (chechUserExists["rows"].length > 0) {
             res.status(501).send()
         }
         else {
-            const insertUser = await pool.query(
+            const insertUser = await client.query(
                 "INSERT INTO users (name, email, regdate, isadmin, password) VALUES (($1), ($2), ($3), ($4), ($5)) RETURNING *",
                 [name, email, regdate, 0, hash]
             )
@@ -337,26 +339,26 @@ app.post('/api/signin', async (req, res) => {
 })
 
 app.get('/api/users', async (req, res) => {
-    const allUsers = await pool.query("SELECT name FROM users")
+    const allUsers = await client.query("SELECT name FROM users")
 
     res.json(allUsers["rows"])
 })
 
 app.get('/api/users/:id', async (req, res) => {
     const id = req.params.id
-    const requestUser = await pool.query("SELECT name FROM users WHERE id = ($1)", [id])
+    const requestUser = await client.query("SELECT name FROM users WHERE id = ($1)", [id])
 
     res.json(requestUser["rows"])
 })
 
 app.get('/api/rooms', async (req, res) => {
-    const allRooms = await pool.query("SELECT * FROM rooms")
+    const allRooms = await client.query("SELECT * FROM rooms")
 
     res.json(allRooms["rows"])
 })
 
 app.get('/api/rooms/:id', async (req, res) => {
-    const getRoom = await pool.query("SELECT * FROM rooms WHERE id = ($1)", [req.params.id])
+    const getRoom = await client.query("SELECT * FROM rooms WHERE id = ($1)", [req.params.id])
 
     res.json(getRoom["rows"][0])
 })
@@ -367,7 +369,7 @@ app.post('/api/rooms', async (req, res) => {
     const current_player = req.body.current_player
     const password = req.body.password
 
-    const insertRoom = await pool.query(
+    const insertRoom = await client.query(
         "INSERT INTO rooms (name, capacity, current_player, password) VALUES (($1), ($2), ($3), ($4)) RETURNING *",
         [name, capacity, current_player, password]
     )
@@ -378,7 +380,7 @@ app.post('/api/rooms', async (req, res) => {
 })
 
 app.put('/api/rooms/:id', async (req, res) => {
-    const updateRoom = await pool.query("UPDATE rooms SET current_player = current_player + 1 WHERE id = ($1) RETURNING *", [req.params.id])
+    const updateRoom = await client.query("UPDATE rooms SET current_player = current_player + 1 WHERE id = ($1) RETURNING *", [req.params.id])
 
     res.json(updateRoom["rows"][0])
 
@@ -386,17 +388,17 @@ app.put('/api/rooms/:id', async (req, res) => {
 })
 
 app.delete('/api/rooms/:id', async (req, res) => {
-    const deleteRoom = await pool.query("DELETE FROM rooms WHERE id = ($1) RETURNING *", [req.params.id])
+    const deleteRoom = await client.query("DELETE FROM rooms WHERE id = ($1) RETURNING *", [req.params.id])
 
     res.json(deleteRoom["rows"][0])
 
     io.emit("db", deleteRoom["rows"][0])
 })
 
-app.use(express.static(path.join(__dirname, "/clienth/build")))
+app.use(express.static(path.join(__dirname, "/client/build")))
 
 app.get('/*', (req, res) => {
-    res.sendFile(path.join(__dirname, '/clienth/build', 'index.html'));
+    res.sendFile(path.join(__dirname, '/client/build', 'index.html'));
 })
 
 const port = process.env.PORT || 8000

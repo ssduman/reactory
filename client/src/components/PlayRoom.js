@@ -145,6 +145,8 @@ const PlayRoom = (props) => {
     const drop = (e) => {
         e.preventDefault()
 
+        checkFinish()
+
         var data = e.dataTransfer.getData("id")
         var s = document.getElementById(data)
         var tempNumber;
@@ -375,6 +377,8 @@ const PlayRoom = (props) => {
 
             e.target.src = s.src
         }
+        
+        checkFinish()
     }
 
     const onMessageSend = (m, me) => {

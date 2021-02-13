@@ -7,6 +7,7 @@ import Home from "./components/Home"
 import About from "./components/About"
 import Blog from "./components/Blog"
 import Drawing from "./components/Drawing"
+import Rooms from "./components/Rooms"
 
 import Footer from "./components/Footer"
 import PlayRoom from "./components/PlayRoom"
@@ -14,7 +15,7 @@ import Okey from "./components/Okey"
 import cookie from 'js-cookie'
 import { io } from "socket.io-client"
 
-var socket = io("http://localhost:4000/") // http://localhost:4000/ or "/"
+var socket = io("/") // / or "/"
 function App() {
     const [rooms, setRooms] = useState([])
     const [user, setUser] = useState({ name: "", email: "" })
@@ -22,7 +23,7 @@ function App() {
     const checkToken = async () => {
         const token = cookie.get("token")
         if (token) {
-            const res = await fetch("http://localhost:4000/api/",
+            const res = await fetch("/api/",
                 {
                     method: "GET",
                     headers: {
@@ -46,31 +47,24 @@ function App() {
     }
 
     const fetchRooms = async () => {
-        const res = await fetch("http://localhost:4000/api/rooms")
+        const res = await fetch("/api/rooms")
         const data = await res.json()
 
         return data
     }
 
     const fetchRoom = async (id) => {
-        const res = await fetch(`http://localhost:4000/api/rooms/${id}`)
+        const res = await fetch(`/api/rooms/${id}`)
         const data = await res.json()
 
         return data
-    }
-
-    const deleteRoom = async (id) => {
-        const res = await fetch(`http://localhost:4000/api/rooms/${id}`, { method: "DELETE" })
-        await res.json()
-
-        setRooms(rooms.filter((room) => room.id !== id))
     }
 
     const playRoom = async (id) => {
         const roomToPlay = await fetchRoom(id)
         const updRoom = { ...roomToPlay, current_player: roomToPlay.current_player + 1 }
 
-        const res = await fetch(`http://localhost:4000/api/rooms/${id}`,
+        const res = await fetch(`/api/rooms/${id}`,
             {
                 method: "PUT",
                 headers: { "Content-type": "application/json" },
@@ -89,8 +83,15 @@ function App() {
         setRooms(rooms.filter((room) => room.id === id ? { ...room, current_player: updRoom.current_player } : room))
     }
 
+    const deleteRoom = async (id) => {
+        const res = await fetch(`/api/rooms/${id}`, { method: "DELETE" })
+        await res.json()
+
+        setRooms(rooms.filter((room) => room.id !== id))
+    }
+
     const createRoom = async (room) => {
-        const res = await fetch("http://localhost:4000/api/rooms/",
+        const res = await fetch("/api/rooms/",
             {
                 method: "POST",
                 headers: {
@@ -107,14 +108,14 @@ function App() {
     }
 
     const fetchUsers = async () => {
-        const res = await fetch("http://localhost:4000/api/users")
+        const res = await fetch("/api/users")
         const data = await res.json()
 
         return data
     }
 
     const fetchUser = async (id) => {
-        const res = await fetch(`http://localhost:4000/api/users${id}`)
+        const res = await fetch(`/api/users${id}`)
         const data = await res.json()
 
         return data
@@ -142,7 +143,7 @@ function App() {
             socket.emit("disconnet")
             socket.off()
         }
-    }, ["http://localhost:4000/"]
+    }, []
     )
 
     return (
@@ -183,6 +184,7 @@ function App() {
                     <About />
                 </>
             )} />
+            {rooms.length > 0 ? <Rooms rooms={rooms} onDelete={deleteRoom} onPlay={playRoom} /> : "No room"}
         </Router >
     );
 }
