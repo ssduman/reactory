@@ -11,10 +11,10 @@ const Chat = ({ onSend }) => {
     const onSubmit = (e) => {
         e.preventDefault()
 
-        if (!message) {
-            alert("fill text")
-            return
-        }
+        // if (!message) {
+        //     alert("fill text")
+        //     return
+        // }
 
         onSend(message)
 
@@ -35,6 +35,7 @@ const Chat = ({ onSend }) => {
                     placeholder="Type your message"
                     rows="5"
                     cols="50"
+                    required
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     onKeyDown={(e) => {

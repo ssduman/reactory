@@ -218,6 +218,7 @@ const PlayRoom = () => {
 
                 socket.on("getTableTile", (client, leader, tile) => {
                     socket.off("getTableTile")
+                    console.log("tile:", tile)
 
                     let split = tile.split("-")
                     let color = split[0]
@@ -242,13 +243,12 @@ const PlayRoom = () => {
                     }
 
                     e.target.src = s.src
+                    tileAllowed = false
                 })
 
                 if (document.getElementById("gostergeButton")) {
                     document.getElementById("gostergeButton").style.display = "none"
                 }
-
-                tileAllowed = false
             }
         }
         else if (s.id === "middle" && !myTurn) {
@@ -262,7 +262,7 @@ const PlayRoom = () => {
                 return
             }
             else if (e.target.id === "right" && myTurn) {
-                if (!tileAllowed) {
+                if (!tileAllowed && s.innerHTML) {
                     e.target.innerHTML = s.innerHTML
                     e.target.style.color = s.style.color
                     s.style.transform = ""
@@ -312,8 +312,9 @@ const PlayRoom = () => {
                 return
             }
             else if (e.target.id === "middle" && socket && myTurn) {
-                if (checkFinish() >= 9) {
-
+                var perCount = checkFinish()
+                var limit = 9
+                if (perCount >= limit && s.innerHTML) {
                     var number = s.innerHTML
                     var color = s.style.color
                     if (color === "rgb(214, 188, 19)") {
@@ -352,6 +353,9 @@ const PlayRoom = () => {
                     document.getElementsByClassName("rectangleA")[0].style.top = "-100px"
                     document.getElementsByClassName("rectangleB")[0].style.top = "-100px"
                     document.getElementsByClassName("rectangleC")[0].style.top = "-100px"
+                }
+                else if (perCount >= limit && !s.innerHTML) {
+                    document.getElementById("perCount").innerHTML = "Drop a tile"
                 }
                 else {
                     document.getElementById("perCount").innerHTML = "Per count is low!"
@@ -397,7 +401,8 @@ const PlayRoom = () => {
         if (color === "rgb(214, 188, 19)") {
             color = "#d6bc13"
         }
-        if (parseInt(number) === parseInt(okeyNumberColor[0]) + 1 && color === okeyNumberColor[1]) {
+        let oN = parseInt(okeyNumberColor[0]) + 1 === 14 ? 1 : parseInt(okeyNumberColor[0]) + 1
+        if (parseInt(number) === oN && color === okeyNumberColor[1]) {
             if (!e.target.style.transform) {
                 e.target.style.transform = "rotate(90deg)"
             }
