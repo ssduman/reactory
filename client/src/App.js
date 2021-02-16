@@ -1,4 +1,4 @@
-import "./App.css";
+import "./App.css"
 import { BrowserRouter as Router, Route } from "react-router-dom"
 import { useState, useEffect } from "react"
 import Header from "./components/Header"
@@ -89,7 +89,7 @@ function App() {
 
         setRooms(rooms.filter((room) => room.id !== id))
     }
-
+    
     const createRoom = async (room) => {
         const res = await fetch("/api/rooms/",
             {
@@ -176,6 +176,7 @@ function App() {
             (
                 <>
                     <Okey socket={socket} />
+                    {rooms.length > 0 ? <Rooms rooms={rooms} onDelete={deleteRoom} onPlay={playRoom} /> : "No room"}
                 </>
             )} />
             <Route path="/about" exact render={(probs) =>
@@ -184,7 +185,6 @@ function App() {
                     <About />
                 </>
             )} />
-            {rooms.length > 0 ? <Rooms rooms={rooms} onDelete={deleteRoom} onPlay={playRoom} /> : "No room"}
         </Router >
     );
 }

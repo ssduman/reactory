@@ -55,6 +55,9 @@
   text-align: center;
   font-weight: bold;
   font-size: 18px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .rectangleB {
@@ -70,6 +73,9 @@
   text-align: center;
   font-weight: bold;
   font-size: 18px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .rectangleC {
@@ -85,6 +91,9 @@
   text-align: center;
   font-weight: bold;
   font-size: 18px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .playerInput {
@@ -215,6 +224,7 @@ textarea {
   height: 20px;
   border-width: 10px;
   margin-left: 10px;
+  padding-left: 4px !important;
   top: 100px;
   left: 700px;
   position: absolute;
@@ -244,8 +254,7 @@ textarea {
   margin-top: 4px !important;
 }
 
-.pointTable
-td {
+.pointTable td {
   max-width: 80px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -256,15 +265,24 @@ td {
 }
 
 .gostergeBtn {
-  top: 400px;
-  left: 640px;
+  top: 350px;
+  left: -260px;
   position: absolute;
-  display: none;
+  display: block;
 }
 
 .roomName {
-  top: 160px;
-  left: 210px;
-  position: absolute;
-  font-size: 18px !important;
+  font-size: 16px !important;
+  max-width: 190px !important;
+  /* width: 8px !important; */
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  display: inline-block;
+}
+
+.readyPlayerList {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

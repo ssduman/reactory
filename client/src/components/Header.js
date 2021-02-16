@@ -2,6 +2,7 @@ import React from 'react'
 import LoginoutForm from "./LoginoutForm"
 import { useState, useEffect } from "react"
 import cookie from 'js-cookie'
+import "../App.css"
 
 const Header = (props) => {
     const [error, setError] = useState({ wrongAcc: false, takenAcc: false })
@@ -10,7 +11,7 @@ const Header = (props) => {
     const loginFunc = async (details) => {
         try {
             if (details.isLogin) {
-                const res = await fetch("http://localhost:4000/api/login/",
+                const res = await fetch("/api/login/",
                     {
                         method: "POST",
                         headers: {
@@ -53,7 +54,7 @@ const Header = (props) => {
 
     const registerUser = async (user) => {
         try {
-            const res = await fetch("http://localhost:4000/api/signin/",
+            const res = await fetch("/api/signin/",
                 {
                     method: "POST",
                     headers: {
@@ -83,8 +84,21 @@ const Header = (props) => {
     return (
         <header className="uk-section-xsmall uk-section-default samd-border samd-rounded-bottom">
             <div className="uk-container">
-                <h1 className="uk-text-center">samd</h1>
-                <LoginoutForm onLogin={loginFunc} onLogout={logoutFunc} onError={error} user={user} />
+                <div className="uk-grid">
+                    <div className="uk-width-1-3">
+                    </div>
+                    <div className="uk-width-expand">
+                        <h1 className="uk-text-center">samd</h1>
+                    </div>
+                    <div className="uk-width-1-3 uk-flex uk-flex-bottom uk-flex-right uk-margin-right">
+                        <button className="uk-button uk-button-default">login / register</button>
+                        <div uk-drop="mode: click; pos: bottom-right;">
+                            <div className="uk-card uk-card-body uk-card-default samd-rounded">
+                                <LoginoutForm onLogin={loginFunc} onLogout={logoutFunc} onError={error} user={user} />
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </header>
     )

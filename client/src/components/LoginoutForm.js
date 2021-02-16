@@ -29,7 +29,7 @@ const LoginoutForm = (props) => {
                 <form onSubmit={submitHandler} >
                     <h2
                         style={props.onError.wrongAcc || props.onError.takenAcc ? { color: "red" } : { color: "black" }} >
-                        Login:
+                        
                         {props.onError.wrongAcc ? <> Account is wrong </> : <></>}
                         {props.onError.takenAcc ? <> Account is taken </> : <></>}
                     </h2>

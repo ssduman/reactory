@@ -300,6 +300,9 @@ const PlayRoom = (props) => {
                     }
 
                     socket.emit("nextTurn", myRightName)
+
+                    checkFinish()
+
                     return
                 }
                 else {
@@ -377,7 +380,7 @@ const PlayRoom = (props) => {
 
             e.target.src = s.src
         }
-        
+
         checkFinish()
     }
 
@@ -1148,15 +1151,15 @@ const PlayRoom = (props) => {
             </li>
 
             <li className="uk-animation-fade">
-                <div className="roomName">Room name: </div>
-
-                <input
-                    className="uk-input uk-form-width-small"
-                    id="playerName"
-                    type="text"
-                    placeholder="name"
-                    style={{ margin: "10px" }}>
-                </input>
+                <div>
+                    <input
+                        className="uk-input uk-form-width-small"
+                        id="playerName"
+                        type="text"
+                        placeholder="name"
+                        style={{ margin: "10px" }}>
+                    </input>
+                </div>
 
                 <div className="uk-flex uk-flex-middle uk-flex-center">
                     <div className="okeyTable">
@@ -1246,7 +1249,7 @@ const PlayRoom = (props) => {
                                     }
                                 }}>
                                 Ready ✖
-                                        </button>
+                            </button>
                             <div className="pointTable">
                                 <table>
                                     <thead>
@@ -1270,7 +1273,7 @@ const PlayRoom = (props) => {
                         </div>
                         <div className="remainingTiles">
                             48
-                                    </div>
+                        </div>
 
                         <div className="rectangleA"></div>
                         <div className="rectangleB"></div>
@@ -1576,29 +1579,31 @@ const PlayRoom = (props) => {
                                 </tr>
                             </tbody>
                         </table>
+
                         <div className="rectangleChat">
                             <Chat onSend={(m) => { onMessageSend(playerName + ": " + m, true) }} />
+                            <span className="roomName">Room name: </span>
                             <div id="readyPlayerDiv"> Ready Players: {totalReadyPlayer}/4 </div>
-                            <div id="readyPlayerDiv1"></div>
-                            <div id="readyPlayerDiv2"></div>
-                            <div id="readyPlayerDiv3"></div>
-                            <div id="readyPlayerDiv4"></div>
+                            <div id="readyPlayerDiv1" className="readyPlayerList"></div>
+                            <div id="readyPlayerDiv2" className="readyPlayerList"></div>
+                            <div id="readyPlayerDiv3" className="readyPlayerList"></div>
+                            <div id="readyPlayerDiv4" className="readyPlayerList"></div>
                         </div>
 
                         <button className="uk-button uk-button-primary gostergeBtn"
                             id="gostergeButton"
                             onClick={() => { gosterge() }}>
                             Gösterge
-                                    </button>
+                        </button>
 
                     </div>
                 </div>
-
+                
                 <button className="uk-button uk-button-primary"
                     id="calculateButton"
                     onClick={() => { checkFinish() }}>
                     Calculate
-                            </button>
+                </button>
                 <span id="perCount" style={{ marginLeft: "4px" }}>Total per: </span>
             </li>
 

@@ -1,5 +1,6 @@
 import React from 'react'
 import { useState } from "react"
+import '../App.css'
 
 const Chat = ({ onSend }) => {
     const [message, setMessage] = useState("")
@@ -7,10 +8,10 @@ const Chat = ({ onSend }) => {
     const onSubmit = (e) => {
         e.preventDefault()
 
-        if (!message) {
-            alert("fill text")
-            return
-        }
+        // if (!message) {
+        //     alert("fill text")
+        //     return
+        // }
 
         onSend(message)
 
@@ -19,21 +20,31 @@ const Chat = ({ onSend }) => {
 
     return (
         <form onSubmit={onSubmit}>
+            <div
+                className="chat-box"
+                id="chatbox">
+            </div>
             <div>
                 <textarea
+                    className="a"
                     name="text-area"
                     id="text-area"
                     placeholder="Type your message"
                     rows="5"
                     cols="50"
-                    value={message} onChange={(e) => setMessage(e.target.value)}
+                    required
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    onKeyDown={(e) => {
+                        if (e.key === "Enter" && e.shiftKey === false) {
+                            e.preventDefault()
+                            onSubmit(e)
+                        }
+                    }}
                 >
                 </textarea>
             </div>
             <input type="submit" value="Send" ></input>
-            <div className="rectangle chat-box" id="chatbox">
-                <div>test</div>
-            </div>
         </form>
     )
 }
