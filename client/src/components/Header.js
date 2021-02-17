@@ -4,9 +4,9 @@ import { useState, useEffect } from "react"
 import cookie from 'js-cookie'
 import "../App.css"
 
-const Header = (props) => {
-    const [error, setError] = useState({ wrongAcc: false, takenAcc: false })
-    const [user, setUser] = useState({ name: "", email: "" })
+const Header = ({ error, setError, user, setUser }) => {
+    // const [error, setError] = useState({ wrongAcc: false, takenAcc: false })
+    // const [user, setUser] = useState({ name: "", email: "" })
 
     const loginFunc = async (details) => {
         try {
@@ -40,8 +40,7 @@ const Header = (props) => {
                 registerUser(newUser)
             }
         }
-        catch {
-            console.log("catch")
+        catch (error) {
         }
     }
 
@@ -76,8 +75,7 @@ const Header = (props) => {
                 setError({ wrongAcc: false, takenAcc: true })
             }
         }
-        catch {
-            console.log("catch")
+        catch (error) {
         }
     }
 
@@ -91,21 +89,35 @@ const Header = (props) => {
                         <h1 className="uk-text-center">samd</h1>
                     </div>
                     <div className="uk-width-1-3 uk-flex uk-flex-bottom uk-flex-right uk-margin-right">
-                        <button className="uk-button uk-button-default">login / register</button>
-                        <div uk-drop="mode: click; pos: bottom-right;">
-                            <div className="uk-card uk-card-body uk-card-default samd-rounded">
-                                <LoginoutForm onLogin={loginFunc} onLogout={logoutFunc} onError={error} user={user} />
-                            </div>
-                        </div>
+                        {user.name !== ""
+                            ?
+                            <>
+                                <form onSubmit={logoutFunc}>
+                                    <label className="uk-form-label" htmlFor="userlogin">Welcome {user.name}</label>
+                                    <input
+                                        className="uk-input"
+                                        type="submit"
+                                        name="userlogin"
+                                        value="Logout"
+                                        onClick={(e) => logoutFunc()}
+                                    />
+                                </form>
+                            </>
+                            :
+                            <>
+                                <button className="uk-button uk-button-default">Login / Register</button>
+                                <div uk-drop="mode: click; pos: bottom-right;">
+                                    <div className="uk-card uk-card-body uk-card-default samd-rounded">
+                                        <LoginoutForm onLogin={loginFunc} onLogout={logoutFunc} onError={error} user={user} />
+                                    </div>
+                                </div>
+                            </>
+                        }
                     </div>
                 </div>
             </div>
         </header>
     )
-}
-
-Header.defaultProps = {
-    title: "default"
 }
 
 export default Header

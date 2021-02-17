@@ -278,32 +278,36 @@ app.post('/api/login', async (req, res, next) => {
     const email = req.body.email
     const password = req.body.password
 
-    const queryResult = await client.query("SELECT * FROM users WHERE name = ($1)", [name])
-    results = queryResult["rows"]
-    console.log("queryResult:", results)
-    if (!results || results === [] || results.length === 0) {
-        console.log("no user found")
-        res.status(501).send("cannot find user")
-    }
-    else {
-        try {
-            if (await bcrypt.compare(password, results[0].password)) {
-                req.session.regenerate(() => {
-                    req.session.user = results[0]
-                })
-                res.status(200)
-                res.json(generateAccessToken({ name: name }))
-                console.log("success")
+    try {
+        const queryResult = await client.query("SELECT * FROM users WHERE name = ($1)", [name])
+        results = queryResult["rows"]
+        console.log("queryResult:", results)
+        if (!results || results === [] || results.length === 0) {
+            console.log("no user found")
+            res.status(401).json({ error: 'no user found' })
+        }
+        else {
+            try {
+                if (await bcrypt.compare(password, results[0].password)) {
+                    req.session.regenerate(() => {
+                        req.session.user = results[0]
+                    })
+                    res.status(200)
+                    res.json(generateAccessToken({ name: name }))
+                    console.log("success")
+                }
+                else {
+                    console.log("hash wrong")
+                    res.status(401).json({ error: 'hash wrong' })
+                }
             }
-            else {
-                console.log("hash wrong")
-                res.status(502).send("not correct")
+            catch {
+                console.log("catchin")
+                res.status(401).json({ error: 'try catch error' })
             }
         }
-        catch {
-            console.log("catchin")
-            res.status(500).send()
-        }
+    } catch (error) {
+        console.error("api/login error:", error)
     }
 })
 
@@ -323,7 +327,7 @@ app.post('/api/signin', async (req, res) => {
 
         const chechUserExists = await client.query("SELECT * FROM users WHERE name = ($1)", [name])
         if (chechUserExists["rows"].length > 0) {
-            res.status(501).send()
+            res.status(401).json({ error: 'user already exists' })
         }
         else {
             const insertUser = await client.query(
@@ -337,7 +341,7 @@ app.post('/api/signin', async (req, res) => {
         }
     }
     catch {
-        res.status(500).send()
+        res.status(401).json({ error: 'singin catch' })
     }
 })
 

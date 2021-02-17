@@ -38,7 +38,9 @@ const Chat = ({ onSend }) => {
                     onKeyDown={(e) => {
                         if (e.key === "Enter" && e.shiftKey === false) {
                             e.preventDefault()
-                            onSubmit(e)
+                            if (message) {
+                                onSubmit(e)
+                            }
                         }
                     }}
                 >

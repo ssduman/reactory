@@ -18,6 +18,7 @@ import { io } from "socket.io-client"
 var socket = io("/") // / or "/"
 function App() {
     const [rooms, setRooms] = useState([])
+    const [error, setError] = useState({ wrongAcc: false, takenAcc: false })
     const [user, setUser] = useState({ name: "", email: "" })
 
     const checkToken = async () => {
@@ -152,7 +153,7 @@ function App() {
             <Route path="/" exact render={(probs) => (
                 <div className="uk-background-muted">
                     <div className="uk-container">
-                        <Header title="there" />
+                        <Header error={error} setError={setError} user={user} setUser={setUser} />
 
                         <Navbar />
 
