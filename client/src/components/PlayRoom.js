@@ -209,40 +209,36 @@ const PlayRoom = (props) => {
                 tempNumber = e.target.innerHTML
                 tempColor = e.target.style.color
 
-                socket.emit("requestTableTile", mySocketName, myLeaderName, room)
+                socket.emit("pickedTableTile", room)
+
+                var tile = tableTile.shift()
+                let split = tile.split("-")
+                let color = split[0]
+                let number = split[1]
+
+                e.target.innerHTML = number.substring(0, number.length - 1)
+                if (color === "fake") {
+                    e.target.style.color = "green"
+                    e.target.innerHTML = "✿"
+                }
+                else if (color === "red") {
+                    e.target.style.color = "red"
+                }
+                else if (color === "yellow") {
+                    e.target.style.color = "#d6bc13"
+                }
+                else if (color === "blue") {
+                    e.target.style.color = "blue"
+                }
+                else if (color === "black") {
+                    e.target.style.color = "black"
+                }
+
+                e.target.src = s.src
+                tileAllowed = false
 
                 var currTableTiles = document.getElementsByClassName("remainingTiles")[0]
                 currTableTiles.innerHTML = parseInt(currTableTiles.innerHTML) - 1
-
-                socket.on("getTableTile", (client, leader, tile) => {
-                    socket.off("getTableTile")
-                    console.log("tile:", tile)
-
-                    let split = tile.split("-")
-                    let color = split[0]
-                    let number = split[1]
-
-                    e.target.innerHTML = number.substring(0, number.length - 1)
-                    if (color === "fake") {
-                        e.target.style.color = "green"
-                        e.target.innerHTML = "✿"
-                    }
-                    else if (color === "red") {
-                        e.target.style.color = "red"
-                    }
-                    else if (color === "yellow") {
-                        e.target.style.color = "#d6bc13"
-                    }
-                    else if (color === "blue") {
-                        e.target.style.color = "blue"
-                    }
-                    else if (color === "black") {
-                        e.target.style.color = "black"
-                    }
-
-                    e.target.src = s.src
-                    tileAllowed = false
-                })
 
                 if (document.getElementById("gostergeButton")) {
                     document.getElementById("gostergeButton").style.display = "none"
@@ -732,7 +728,7 @@ const PlayRoom = (props) => {
             document.getElementById("listhead-" + room).remove()
         })
 
-        socket.on("getTile", (mTile, tName, sName, lName, tableMap, okey) => {
+        socket.on("getTile", (mTile, tName, sName, lName, tableMap, okey, tTile) => {
             myTile = mTile
             myTableName = tName
             mySocketName = sName
@@ -749,6 +745,7 @@ const PlayRoom = (props) => {
             myOppositePlayerName = tableMap["middleName"]
             var oRect = document.getElementsByClassName("rectangleB")[0]
             oRect.innerHTML = myOppositePlayerName
+            tableTile = tTile
 
             if (myLeaderName === myLeftName) {
                 lRect.style.boxShadow = "0px 0px 5px 4px rgba(51,136,86,0.64)"
@@ -878,7 +875,7 @@ const PlayRoom = (props) => {
                 document.getElementById("gostergeButton").style.display = "block"
             }
 
-            socket.emit("tilesReady", otherClients, room, [b_tile, c_tile, d_tile], sName, tableMap, okey)
+            socket.emit("tilesReady", otherClients, room, [b_tile, c_tile, d_tile], sName, tableMap, okey, tableTile)
         })
 
         socket.on("pickTableTile", (client, leader) => {
@@ -1032,6 +1029,7 @@ const PlayRoom = (props) => {
         })
 
         socket.on("decreaseTableTiles", () => {
+            tableTile.shift()
             var currTableTiles = document.getElementsByClassName("remainingTiles")[0]
             currTableTiles.innerHTML = parseInt(currTableTiles.innerHTML) - 1
         })

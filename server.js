@@ -208,10 +208,14 @@ io.on("connection", (socket) => {
         }
     })
 
-    socket.on("tilesReady", (otherClients, room, tiles, lName, tableMap, okey) => {
-        io.to(otherClients[0]).emit("getTile", tiles[0], "a_table", otherClients[0], lName, tableMap["0"], okey)
-        io.to(otherClients[1]).emit("getTile", tiles[1], "b_table", otherClients[1], lName, tableMap["1"], okey)
-        io.to(otherClients[2]).emit("getTile", tiles[2], "d_table", otherClients[2], lName, tableMap["3"], okey)
+    socket.on("tilesReady", (otherClients, room, tiles, lName, tableMap, okey, tableTile) => {
+        io.to(otherClients[0]).emit("getTile", tiles[0], "a_table", otherClients[0], lName, tableMap["0"], okey, tableTile)
+        io.to(otherClients[1]).emit("getTile", tiles[1], "b_table", otherClients[1], lName, tableMap["1"], okey, tableTile)
+        io.to(otherClients[2]).emit("getTile", tiles[2], "d_table", otherClients[2], lName, tableMap["3"], okey, tableTile)
+    })
+
+    socket.on("pickedTableTile", (room) => {
+        socket.to(room).emit("decreaseTableTiles")
     })
 
     socket.on("requestTableTile", (client, leader, room) => {
@@ -273,7 +277,7 @@ app.get('/api', authenticateToken, (req, res) => {
     res.json(req.user)
 })
 
-app.post('/api/login', async (req, res, next) => {
+app.post('/api/login', async (req, res) => {
     const name = req.body.name
     const email = req.body.email
     const password = req.body.password
@@ -281,9 +285,8 @@ app.post('/api/login', async (req, res, next) => {
     try {
         const queryResult = await client.query("SELECT * FROM users WHERE name = ($1)", [name])
         results = queryResult["rows"]
-        console.log("queryResult:", results)
+        
         if (!results || results === [] || results.length === 0) {
-            console.log("no user found")
             res.status(401).json({ error: 'no user found' })
         }
         else {
@@ -294,15 +297,12 @@ app.post('/api/login', async (req, res, next) => {
                     })
                     res.status(200)
                     res.json(generateAccessToken({ name: name }))
-                    console.log("success")
                 }
                 else {
-                    console.log("hash wrong")
                     res.status(401).json({ error: 'hash wrong' })
                 }
             }
             catch {
-                console.log("catchin")
                 res.status(401).json({ error: 'try catch error' })
             }
         }
@@ -402,11 +402,11 @@ app.delete('/api/rooms/:id', async (req, res) => {
     io.emit("db", deleteRoom["rows"][0])
 })
 
-app.use(express.static(path.join(__dirname, "/client/build")))
-
 app.get('/*', (req, res) => {
     res.sendFile(path.join(__dirname, '/client/build', 'index.html'));
 })
+
+app.use(express.static(path.join(__dirname, "/client/build")))
 
 const port = process.env.PORT || 8000
 
