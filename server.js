@@ -402,11 +402,11 @@ app.delete('/api/rooms/:id', async (req, res) => {
     io.emit("db", deleteRoom["rows"][0])
 })
 
+app.use(express.static(path.join(__dirname, "/client/build")))
+
 app.get('/*', (req, res) => {
     res.sendFile(path.join(__dirname, '/client/build', 'index.html'));
 })
-
-app.use(express.static(path.join(__dirname, "/client/build")))
 
 const port = process.env.PORT || 8000
 
