@@ -295,7 +295,11 @@ const PlayRoom = (props) => {
                         document.getElementById("gostergeButton").style.display = "none"
                     }
 
-                    socket.emit("nextTurn", myRightName)
+                    socket.emit("nextTurn", myRightName, (res) => {
+                        if (!res || res !== 1) {
+                            console.log("res:", res)
+                        }
+                    })
 
                     checkFinish()
 

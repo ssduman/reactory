@@ -1,6 +1,9 @@
 import "./App.css"
 import { BrowserRouter as Router, Route } from "react-router-dom"
 import { useState, useEffect } from "react"
+import cookie from 'js-cookie'
+import { io } from "socket.io-client"
+
 import Header from "./components/Header"
 import Navbar from "./components/Navbar"
 import Home from "./components/Home"
@@ -8,12 +11,10 @@ import About from "./components/About"
 import Blog from "./components/Blog"
 import Drawing from "./components/Drawing"
 import Rooms from "./components/Rooms"
-
 import Footer from "./components/Footer"
 import PlayRoom from "./components/PlayRoom"
 import Okey from "./components/Okey"
-import cookie from 'js-cookie'
-import { io } from "socket.io-client"
+import AmongTurrets from "./components/AmongTurrets"
 
 var socket = io("/") // / or "/"
 function App() {
@@ -90,7 +91,7 @@ function App() {
 
         setRooms(rooms.filter((room) => room.id !== id))
     }
-    
+
     const createRoom = async (room) => {
         const res = await fetch("/api/rooms/",
             {
@@ -151,8 +152,10 @@ function App() {
         <Router>
 
             <Route path="/" exact render={(probs) => (
+
                 <div className="uk-background-muted">
                     <div className="uk-container">
+
                         <Header error={error} setError={setError} user={user} setUser={setUser} />
 
                         <Navbar />
@@ -164,6 +167,7 @@ function App() {
                                     <About />
                                     <Blog />
                                     <PlayRoom socket={socket} />
+                                    <AmongTurrets />
                                     <Drawing />
                                 </ul>
                             </div>
@@ -173,6 +177,7 @@ function App() {
                     </div>
                 </div>
             )} />
+
             <Route path="/okey" exact render={(probs) =>
             (
                 <>
@@ -180,12 +185,14 @@ function App() {
                     {rooms.length > 0 ? <Rooms rooms={rooms} onDelete={deleteRoom} onPlay={playRoom} /> : "No room"}
                 </>
             )} />
+
             <Route path="/about" exact render={(probs) =>
             (
                 <>
                     <About />
                 </>
             )} />
+
         </Router >
     );
 }

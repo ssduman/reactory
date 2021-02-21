@@ -231,8 +231,9 @@ io.on("connection", (socket) => {
         socket.to(room).emit("sendRight", client, leader, left, right, middle, tile)
     })
 
-    socket.on("nextTurn", (right) => {
+    socket.on("nextTurn", (right, callback) => {
         io.to(right).emit("myTurn")
+        callback(1)
     })
 
     socket.on("myLeftChanged", (client, leader, number, color) => {

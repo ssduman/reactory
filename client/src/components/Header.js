@@ -1,12 +1,9 @@
 import React from 'react'
 import LoginoutForm from "./LoginoutForm"
-import { useState, useEffect } from "react"
 import cookie from 'js-cookie'
 import "../App.css"
 
 const Header = ({ error, setError, user, setUser }) => {
-    // const [error, setError] = useState({ wrongAcc: false, takenAcc: false })
-    // const [user, setUser] = useState({ name: "", email: "" })
 
     const loginFunc = async (details) => {
         try {
