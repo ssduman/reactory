@@ -166,16 +166,16 @@ const PlayRoom = (props) => {
                 e.target.innerHTML = s.innerHTML
                 e.target.style.color = s.style.color
 
-                document.getElementsByClassName("cell2")[0].style.color = "black"
-
                 myLeftTileStack.pop()
                 if (myLeftTileStack.length === 0) {
                     s.innerHTML = ""
                     s.style.color = "black"
+                    document.getElementsByClassName("cell2")[0].style.color = "black"
                 }
                 else {
                     s.innerHTML = myLeftTileStack[myLeftTileStack.length - 1][0]
                     s.style.color = myLeftTileStack[myLeftTileStack.length - 1][1]
+                    document.getElementsByClassName("cell2")[0].style.color = myLeftTileStack[myLeftTileStack.length - 1][1]
                 }
 
                 if (document.getElementById("gostergeButton")) {
@@ -769,12 +769,18 @@ const PlayRoom = (props) => {
             okeyTile["0"].innerHTML = okey[0]
             okeyTile["0"].style.color = okey[1]
 
-            myTile.map((tile, index) => {
-                let i = index + 1
-                let entry = document.getElementById(i.toString())
+            var index = 0
+            var curr_color = myTile[0].split("-")[0]
+            myTile.map((tile) => {
                 let split = tile.split("-")
                 let color = split[0]
                 let number = split[1]
+                if (curr_color !== color) {
+                    index += 1
+                }
+                curr_color = color
+                index += 1
+                let entry = document.getElementById(index.toString())
                 entry.innerHTML = number.substring(0, number.length - 1)
                 if (color === "fake") {
                     entry.style.color = "green"
@@ -837,18 +843,37 @@ const PlayRoom = (props) => {
             var c = _.sample(_.without(_.without(remaining, ...a), ...b), 14)
             var d = _.sample(_.without(_.without(_.without(remaining, ...a), ...b), ...c), 14)
             var other = _.without(_.without(_.without(_.without(remaining, ...a), ...b), ...c), ...d)
-            const a_tile = a.map(e => Object.keys(e)[0])
-            const b_tile = b.map(e => Object.keys(e)[0])
-            const c_tile = c.map(e => Object.keys(e)[0])
-            const d_tile = d.map(e => Object.keys(e)[0])
+            const a_tile = a.map(e => Object.keys(e)[0]).sort()
+            const b_tile = b.map(e => Object.keys(e)[0]).sort()
+            const c_tile = c.map(e => Object.keys(e)[0]).sort()
+            const d_tile = d.map(e => Object.keys(e)[0]).sort()
+
+            a_tile.sort((a, b) => (a.split("-")[0] > b.split("-")[0]) ? -1 : 1)
+            a_tile.sort((a, b) => (parseInt(a.split("-")[1]) > parseInt(b.split("-")[1]) && a.split("-")[0] === b.split("-")[0]) ? 1 : -1)
+
+            b_tile.sort((a, b) => (a.split("-")[0] > b.split("-")[0]) ? -1 : 1)
+            b_tile.sort((a, b) => (parseInt(a.split("-")[1]) > parseInt(b.split("-")[1]) && a.split("-")[0] === b.split("-")[0]) ? 1 : -1)
+
+            c_tile.sort((a, b) => (a.split("-")[0] > b.split("-")[0]) ? -1 : 1)
+            c_tile.sort((a, b) => (parseInt(a.split("-")[1]) > parseInt(b.split("-")[1]) && a.split("-")[0] === b.split("-")[0]) ? 1 : -1)
+
+            d_tile.sort((a, b) => (a.split("-")[0] > b.split("-")[0]) ? -1 : 1)
+            d_tile.sort((a, b) => (parseInt(a.split("-")[1]) > parseInt(b.split("-")[1]) && a.split("-")[0] === b.split("-")[0]) ? 1 : -1)
+
             tableTile = _.shuffle(other.map(e => Object.keys(e)[0]))
 
-            a_tile.map((tile, index) => {
-                let i = index + 1
-                let entry = document.getElementById(i.toString())
+            var index = 0
+            var curr_color = a_tile[0].split("-")[0]
+            a_tile.map((tile) => {
                 let split = tile.split("-")
                 let color = split[0]
                 let number = split[1]
+                if (curr_color !== color) {
+                    index += 1
+                }
+                curr_color = color
+                index += 1
+                let entry = document.getElementById(index.toString())
                 entry.innerHTML = number.substring(0, number.length - 1)
                 if (color === "fake") {
                     entry.style.color = "green"
