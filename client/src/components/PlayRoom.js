@@ -119,7 +119,6 @@ const allTiles = [
 var socket;
 var myTile;
 var tableTile;
-var myTableName;
 var mySocketName;
 var myLeaderName;
 var myLeftName;
@@ -380,6 +379,46 @@ const PlayRoom = (props) => {
 
             e.target.src = s.src
         }
+
+        checkFinish()
+    }
+
+    const fillTable = (tiles) => {
+        var index = 0
+        var nextRow = true
+        var curr_color = tiles[0].split("-")[0]
+        tiles.map((tile) => {
+            let split = tile.split("-")
+            let color = split[0]
+            let number = split[1]
+            if (curr_color !== color) {
+                index += 1
+                if (index >= 7 && nextRow) {
+                    index = 14
+                    nextRow = false
+                }
+            }
+            curr_color = color
+            index += 1
+            let entry = document.getElementById(index.toString())
+            entry.innerHTML = number.substring(0, number.length - 1)
+            if (color === "fake") {
+                entry.style.color = "green"
+                entry.innerHTML = "✿"
+            }
+            else if (color === "red") {
+                entry.style.color = "red"
+            }
+            else if (color === "yellow") {
+                entry.style.color = "#d6bc13"
+            }
+            else if (color === "blue") {
+                entry.style.color = "blue"
+            }
+            else if (color === "black") {
+                entry.style.color = "black"
+            }
+        })
 
         checkFinish()
     }
@@ -734,7 +773,6 @@ const PlayRoom = (props) => {
 
         socket.on("getTile", (mTile, tName, sName, lName, tableMap, okey, tTile) => {
             myTile = mTile
-            myTableName = tName
             mySocketName = sName
             myLeaderName = lName
             myLeftName = tableMap["left"]
@@ -769,36 +807,7 @@ const PlayRoom = (props) => {
             okeyTile["0"].innerHTML = okey[0]
             okeyTile["0"].style.color = okey[1]
 
-            var index = 0
-            var curr_color = myTile[0].split("-")[0]
-            myTile.map((tile) => {
-                let split = tile.split("-")
-                let color = split[0]
-                let number = split[1]
-                if (curr_color !== color) {
-                    index += 1
-                }
-                curr_color = color
-                index += 1
-                let entry = document.getElementById(index.toString())
-                entry.innerHTML = number.substring(0, number.length - 1)
-                if (color === "fake") {
-                    entry.style.color = "green"
-                    entry.innerHTML = "✿"
-                }
-                else if (color === "red") {
-                    entry.style.color = "red"
-                }
-                else if (color === "yellow") {
-                    entry.style.color = "#d6bc13"
-                }
-                else if (color === "blue") {
-                    entry.style.color = "blue"
-                }
-                else if (color === "black") {
-                    entry.style.color = "black"
-                }
-            })
+            fillTable(myTile)
 
             if (document.getElementById("gostergeButton")) {
                 document.getElementById("gostergeButton").style.display = "block"
@@ -806,7 +815,6 @@ const PlayRoom = (props) => {
         })
 
         socket.on("leader", (otherClients, room, sName, tableMap) => {
-            myTableName = "c_table"
             mySocketName = sName
             myLeaderName = sName
             myLeftName = tableMap["2"]["left"]
@@ -862,36 +870,7 @@ const PlayRoom = (props) => {
 
             tableTile = _.shuffle(other.map(e => Object.keys(e)[0]))
 
-            var index = 0
-            var curr_color = a_tile[0].split("-")[0]
-            a_tile.map((tile) => {
-                let split = tile.split("-")
-                let color = split[0]
-                let number = split[1]
-                if (curr_color !== color) {
-                    index += 1
-                }
-                curr_color = color
-                index += 1
-                let entry = document.getElementById(index.toString())
-                entry.innerHTML = number.substring(0, number.length - 1)
-                if (color === "fake") {
-                    entry.style.color = "green"
-                    entry.innerHTML = "✿"
-                }
-                else if (color === "red") {
-                    entry.style.color = "red"
-                }
-                else if (color === "yellow") {
-                    entry.style.color = "#d6bc13"
-                }
-                else if (color === "blue") {
-                    entry.style.color = "blue"
-                }
-                else if (color === "black") {
-                    entry.style.color = "black"
-                }
-            })
+            fillTable(a_tile)
 
             var divRectD = document.getElementsByClassName("rectangleD")[0]
             divRectD.style.boxShadow = "0px 0px 5px 4px rgba(51,136,86,0.64)"
@@ -1122,6 +1101,10 @@ const PlayRoom = (props) => {
         socket.on("decreaseGosterge", (pName) => {
             let itsPoint = document.getElementById("pPoint-" + pName)
             document.getElementById("pPoint-" + pName).innerHTML = parseInt(itsPoint.innerHTML) - 2
+
+            if (document.getElementById("gostergeButton")) {
+                document.getElementById("gostergeButton").style.display = "none"
+            }
         })
 
         socket.on("messageSend", (from, message) => {
@@ -1212,16 +1195,16 @@ const PlayRoom = (props) => {
                                             document.getElementById("readyPlayerDiv" + totalReadyPlayer).innerHTML = playerName
                                             socket.emit("imready", user, room, playerName)
 
-                                            document.getElementsByClassName("rectangleA")[0].style.border = "1px solid black"
-                                            document.getElementsByClassName("rectangleB")[0].style.border = "1px solid black"
-                                            document.getElementsByClassName("rectangleC")[0].style.border = "1px solid black"
+                                            document.getElementsByClassName("rectangleA")[0].style.border = "solid"
+                                            document.getElementsByClassName("rectangleB")[0].style.border = "solid"
+                                            document.getElementsByClassName("rectangleC")[0].style.border = "solid"
 
                                             document.getElementsByClassName("rectangleA")[0].style.top = "50px"
                                             document.getElementsByClassName("rectangleB")[0].style.top = "-60px"
                                             document.getElementsByClassName("rectangleC")[0].style.top = "50px"
 
                                             document.getElementsByClassName("rectangleA")[0].style.height = "250px"
-                                            document.getElementsByClassName("rectangleB")[0].style.height = "130px"
+                                            document.getElementsByClassName("rectangleB")[0].style.height = "100px"
                                             document.getElementsByClassName("rectangleC")[0].style.height = "250px"
 
                                             document.getElementsByClassName("rectangleB")[0].style.width = "500px"
@@ -1296,11 +1279,8 @@ const PlayRoom = (props) => {
                         <div className="cell2" style={{ color: "black" }}></div>
                         <div className="cell3" style={{ color: "black" }}></div>
 
-                        <div className="okeyTile" style={{ color: "purple" }}>
-                        </div>
-                        <div className="remainingTiles">
-                            48
-                        </div>
+                        <div className="okeyTile" style={{ color: "purple" }}></div>
+                        <div className="remainingTiles">48</div>
 
                         <div className="rectangleA"></div>
                         <div className="rectangleB"></div>
@@ -1625,7 +1605,7 @@ const PlayRoom = (props) => {
 
                     </div>
                 </div>
-                
+
                 <button className="uk-button uk-button-primary"
                     id="calculateButton"
                     onClick={() => { checkFinish() }}>

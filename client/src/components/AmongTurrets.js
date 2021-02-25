@@ -1,4 +1,5 @@
 import React from 'react'
+import { useEffect } from "react"
 // import Unity, { UnityContent } from "react-unity-webgl"
 
 const AmongTurrets = (props) => {
@@ -25,14 +26,13 @@ const AmongTurrets = (props) => {
     //     }
     // }
 
-
     return (
-        <li className="uk-animation-fade" id="amongTurret">
-            <div className="" uk-height-viewport="expand: true;" id="amongTurret">
-                <h2 id="amongTurret">Among Turrets</h2>
+        <li className="uk-animation-fade">
+            <div className="" uk-height-viewport="expand: true;">
+                <h2>Among Turrets</h2>
                 <iframe
                     src="https://perought.github.io/pages-demo/"
-                    style={{ width: "100%", height: "700px" }}
+                    style={{ width: "100%", height: "600px" }}
                 />
                 {/* <Unity unityContent={props.unityContent} id="amongTurret" /> */}
             </div>

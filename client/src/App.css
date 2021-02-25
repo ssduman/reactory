@@ -45,6 +45,7 @@
 .rectangleA {
   width: 100px;
   height: 250px;
+  color: black;
   border-color: black;
   border-width: 10px;
   stroke: black;
@@ -63,6 +64,7 @@
 .rectangleB {
   width: 500px;
   height: 100px;
+  color: black;
   border-color: black;
   border-width: 10px;
   stroke: black;
@@ -81,6 +83,7 @@
 .rectangleC {
   width: 100px;
   height: 250px;
+  color: black;
   border-color: black;
   border-width: 10px;
   stroke: black;
