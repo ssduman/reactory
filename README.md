@@ -1,5 +1,5 @@
 # Reactory #
-* Full stack web site: https://samd.herokuapp.com/
+* Full stack website: https://samd.herokuapp.com/
 ## Specifications: ##
 * Supports user registration, login and logout.
 * Salted and hashed passwords are saved into PostgreSQL database.
@@ -8,7 +8,6 @@
 * Points are decreased from player when the player won the game.
 * Supports real-time chat system and ready player records.
 * Shows active rooms to join.
-* I'm planning to add real blog system.
 ## Dependencies: ##
 * React
 * Express
@@ -67,3 +66,5 @@
 * Sometimes unexpected things happen like not joining the room again. I think this is due to delay on sockets.
 * Calculating gosterge is bugged. I didn't cover all posibilities and finishing with cifte (see Wikipedia). If per count is equal or higher than 9, player can finish the game. 
 * If no tiles left on middle, the rules says that all tiles in the table will be shuffle and put in the middle. However, I didn't implement this.
+* Home, about, blog and drawing board are placeholders. I'm planning to add real blog and drawing systems and fill sections.
+* System depends on url. https://samd.herokuapp.com/# can broke the joining to room or other system.
