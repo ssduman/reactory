@@ -21,7 +21,7 @@
 * `npm install && npm start` for running server, `cd client && npm install && npm start` for running client. 
 * `cd client && npm install && npm run build` then `cd .. && npm start` for only running server and hosting static files.
 ## Design: ##
-* [@ogoregen](https://github.com/ogoregen)
+* [@ogoregen](https://github.com/ogoregen) and me.
 ## Images: ##
 <table>
     <tr>
