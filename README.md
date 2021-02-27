@@ -19,6 +19,11 @@
 ## Run: ##
 * `npm install && npm start` for running server, `cd client && npm install && npm start` for running client and go to http://localhost:3000/. 
 * `cd client && npm install && npm run build` then `cd .. && npm start` for only running server and hosting static files and go to http://localhost:4000/.
+## Environment Variables: ##
+* Create `.env` file in the root directory and fill these:
+   1. SESSION_SECRET
+   1. DATABASE_URL
+   1. TOKEN_SECRET
 ## Design: ##
 * [@ogoregen](https://github.com/ogoregen) and me.
 ## Images: ##
@@ -61,11 +66,6 @@
     </tr>
 </table>
 
-## Environment Variables: ##
-* Create `.env` file in the root directory and fill these:
-   1. SESSION_SECRET
-   1. DATABASE_URL
-   1. TOKEN_SECRET
 ### Bugs and Limitations: ###
 * Due to free version of Heroku, the site waking up like in 30 seconds if sleeping for the first time.
 * Sometimes unexpected things happen like not joining the room again. I think this is due to delay on sockets.
