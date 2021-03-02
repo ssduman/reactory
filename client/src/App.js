@@ -16,7 +16,7 @@ import PlayRoom from "./components/PlayRoom"
 import Okey from "./components/Okey"
 import AmongTurrets from "./components/AmongTurrets"
 
-var socket = io("/") // / or "/"
+var socket = io("http://localhost:4000/") // http://localhost:4000/ or "/"
 function App() {
     const [rooms, setRooms] = useState([])
     const [error, setError] = useState({ wrongAcc: false, takenAcc: false })
@@ -25,7 +25,7 @@ function App() {
     const checkToken = async () => {
         const token = cookie.get("token")
         if (token) {
-            const res = await fetch("/api/",
+            const res = await fetch("http://localhost:4000/api/",
                 {
                     method: "GET",
                     headers: {
@@ -49,14 +49,14 @@ function App() {
     }
 
     const fetchRooms = async () => {
-        const res = await fetch("/api/rooms")
+        const res = await fetch("http://localhost:4000/api/rooms")
         const data = await res.json()
 
         return data
     }
 
     const fetchRoom = async (id) => {
-        const res = await fetch(`/api/rooms/${id}`)
+        const res = await fetch(`http://localhost:4000/api/rooms/${id}`)
         const data = await res.json()
 
         return data
@@ -66,7 +66,7 @@ function App() {
         const roomToPlay = await fetchRoom(id)
         const updRoom = { ...roomToPlay, current_player: roomToPlay.current_player + 1 }
 
-        const res = await fetch(`/api/rooms/${id}`,
+        const res = await fetch(`http://localhost:4000/api/rooms/${id}`,
             {
                 method: "PUT",
                 headers: { "Content-type": "application/json" },
@@ -86,14 +86,14 @@ function App() {
     }
 
     const deleteRoom = async (id) => {
-        const res = await fetch(`/api/rooms/${id}`, { method: "DELETE" })
+        const res = await fetch(`http://localhost:4000/api/rooms/${id}`, { method: "DELETE" })
         await res.json()
 
         setRooms(rooms.filter((room) => room.id !== id))
     }
 
     const createRoom = async (room) => {
-        const res = await fetch("/api/rooms/",
+        const res = await fetch("http://localhost:4000/api/rooms/",
             {
                 method: "POST",
                 headers: {
@@ -110,14 +110,14 @@ function App() {
     }
 
     const fetchUsers = async () => {
-        const res = await fetch("/api/users")
+        const res = await fetch("http://localhost:4000/api/users")
         const data = await res.json()
 
         return data
     }
 
     const fetchUser = async (id) => {
-        const res = await fetch(`/api/users${id}`)
+        const res = await fetch(`http://localhost:4000/api/users${id}`)
         const data = await res.json()
 
         return data
