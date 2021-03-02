@@ -17,13 +17,12 @@
 * bcrypt
 * and more
 ## Run: ##
-* `npm install && npm start` for running server, `cd client && npm install && npm start` for running client and go to http://localhost:3000/. 
-* `cd client && npm install && npm run build` then `cd .. && npm start` for only running server and hosting static files and go to http://localhost:4000/.
-## Environment Variables: ##
 * Create `.env` file in the root directory and fill these:
    1. SESSION_SECRET
    1. DATABASE_URL
    1. TOKEN_SECRET
+* `npm install && npm start` for running server, `cd client && npm install && npm start` for running client and go to http://localhost:3000/. 
+* `npm install && npm start` then `cd client && npm install && npm run build` for only running server and hosting static files and go to http://localhost:4000/.
 ## Design: ##
 * [@ogoregen](https://github.com/ogoregen) and me.
 ## Images: ##
@@ -69,7 +68,8 @@
 ### Bugs and Limitations: ###
 * Due to free version of Heroku, the site waking up like in 30 seconds if sleeping for the first time.
 * Sometimes unexpected things happen like not joining the room again. I think this is due to delay on sockets.
-* Calculating gosterge is bugged. All posibilities and finishing with cifte (see Wikipedia) are not covered. If per count is equal or higher than 9, player can finish the game. 
-* If no tiles left on middle, the rules says that all tiles in the table will be shuffle and put in the middle. However, I didn't implement this.
+* If two or more players are the same name, point table won't work properly.
+* Calculating gosterge is bugged. All posibilities are not covered. If per count is equal or higher than 9 (but it should be 14), player can finish the game. 
+* If no tiles left on middle, the rules says that all tiles except at the top in the table will be shuffle and put in the middle. However, I didn't implement this.
 * Home, about, blog and drawing board are placeholders. I'm planning to add real blog and drawing systems and fill sections.
 * System depends on url. https://samd.herokuapp.com/# can broke the joining to room or other system.
