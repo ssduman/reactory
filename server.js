@@ -131,7 +131,15 @@ io.on("connection", (socket) => {
     })
 
     socket.on("messageSend", (from, message, room) => {
-        socket.to(room + "temp").emit("messageSend", from, message)
+        let clients = io.sockets.adapter.rooms.get(room)
+        let numClients = clients ? clients.size : 0
+
+        if (numClients == 4) {
+            socket.to(room).emit("messageSend", from, message)
+        }
+        else {
+            socket.to(room + "temp").emit("messageSend", from, message)
+        }
     })
 
     socket.on("imready", (user, room, name) => {
