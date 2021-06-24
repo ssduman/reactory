@@ -31,6 +31,7 @@ var totalReadyPlayerName = []
 var totalOnlinePlayers = 1
 var user;
 var room;
+var limit = 9
 const PlayRoom = (props) => {
 
     const drop = (e) => {
@@ -205,7 +206,6 @@ const PlayRoom = (props) => {
             }
             else if (e.target.id === "middle" && socket && myTurn) {
                 var perCount = checkFinish()
-                var limit = 9
                 if (perCount >= limit && s.innerHTML) {
                     var number = s.innerHTML
                     var color = s.style.color
@@ -315,13 +315,25 @@ const PlayRoom = (props) => {
         checkFinish()
     }
 
-    const onMessageSend = (m, me) => {
-        const div = document.createElement("div")
-        div.innerHTML = m
-        document.getElementById("chatbox").prepend(div)
+    const commands = (m) => {
+        var command = m.split(" ")
+        if (command.length == 3 && command[1] == "/limit" && !isNaN(command[2])) {
+            limit = parseInt(command[2])
+            return true;
+        }
 
-        if (me) {
-            socket.emit("messageSend", playerName, m, room)
+        return false
+    }
+
+    const onMessageSend = (m, me) => {
+        if (!commands(m)) {
+            const div = document.createElement("div")
+            div.innerHTML = m
+            document.getElementById("chatbox").prepend(div)
+            
+            if (me) {
+                socket.emit("messageSend", playerName, m, room)
+            }
         }
     }
 
