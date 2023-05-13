@@ -1,5 +1,5 @@
 # Reactory #
-* Full stack website: https://samd.herokuapp.com/
+* Full stack website.
 ## Specifications: ##
 * Supports user registration, login and logout.
 * Salted and hashed passwords are saved into PostgreSQL database.
@@ -66,10 +66,8 @@
 </table>
 
 ### Bugs and Limitations: ###
-* Due to free version of Heroku, the site waking up like in 30 seconds if sleeping for the first time.
 * Sometimes unexpected things happen like not joining the room again. I think this is due to delay on sockets.
 * If two or more players are the same name, point table won't work properly.
 * Calculating gosterge is bugged. All posibilities are not covered. If per count is equal or higher than 9 (but it should be 14), player can finish the game. 
 * If no tiles left on middle, the rules says that all tiles except at the top in the table will be shuffle and put in the middle. However, I didn't implement this.
 * Home, about, blog and drawing board are placeholders. I'm planning to add real blog and drawing systems and fill sections.
-* System depends on url. https://samd.herokuapp.com/# can broke the joining to room or other system.
